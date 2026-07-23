@@ -1,0 +1,56 @@
+import { useEffect, useState } from "react";
+
+import { workspaceService } from "../services/workspace.service";
+
+import type { WorkspaceProject } from "../types";
+
+export function useWorkspace() {
+  const [projects, setProjects] = useState<WorkspaceProject[]>([]);
+
+  useEffect(() => {
+    setProjects(workspaceService.getProjects());
+  }, []);
+
+  function deleteProject(id: string) {
+  const updatedProjects = projects.filter(
+    (project) => project.id !== id
+  );
+
+  setProjects(updatedProjects);
+
+  workspaceService.saveProjects(updatedProjects);
+}
+
+function createProject(project: WorkspaceProject) {
+  const updatedProjects = [
+    project,
+    ...projects,
+  ];
+
+  setProjects(updatedProjects);
+
+  workspaceService.saveProjects(updatedProjects);
+}
+
+function updateProject(updatedProject: WorkspaceProject) {
+  const updatedProjects = projects.map((project) =>
+    project.id === updatedProject.id
+      ? updatedProject
+      : project
+  );
+
+  setProjects(updatedProjects);
+
+  workspaceService.saveProjects(updatedProjects);
+}
+
+
+
+ return {
+  projects,
+  setProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+};
+}

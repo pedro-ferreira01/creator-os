@@ -1,5 +1,6 @@
 import {
   Home,
+  FolderOpen,
   Download,
   BarChart3,
   Wallet,
@@ -9,32 +10,37 @@ import {
 
 export const navigation = [
   {
-    title: "Command Center",
-    href: "/",
+    label: "Command Center",
+    href: "/command-center",
     icon: Home,
   },
   {
-    title: "Downloader",
+    label: "Workspace",
+    href: "/workspace",
+    icon: FolderOpen,
+  },
+  {
+    label: "Downloader",
     href: "/downloader",
     icon: Download,
   },
   {
-    title: "Analytics",
-    href: "/analytics",
-    icon: BarChart3,
+    label: "AI Studio",
+    href: "/ai-studio",
+    icon: Sparkles,
   },
   {
-    title: "Financeiro",
+    label: "Financeiro",
     href: "/finance",
     icon: Wallet,
   },
   {
-    title: "AI Studio",
-    href: "/ai",
-    icon: Sparkles,
+    label: "Analytics",
+    href: "/analytics",
+    icon: BarChart3,
   },
   {
-    title: "Configurações",
+    label: "Configurações",
     href: "/settings",
     icon: Settings,
   },

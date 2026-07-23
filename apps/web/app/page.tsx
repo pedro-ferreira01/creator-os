@@ -1,10 +1,5 @@
-import Dashboard from "@/components/dashboard/Dashboard";
-import Shell from "@/components/layout/Shell";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <Shell>
-      <Dashboard />
-    </Shell>
-  );
+  redirect("/command-center");
 }

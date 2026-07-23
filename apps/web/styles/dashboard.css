@@ -39,6 +39,35 @@
   font-weight: 600;
 }
 
+.button-secondary {
+  background: #334155;
+  color: white;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-secondary:hover {
+  background: #475569;
+}
+
+.button-danger {
+  background: #dc2626;
+  color: white;
+  border: 1px solid #b91c1c;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-danger:hover {
+  background: #b91c1c;
+}
+
+
 .button-primary:hover {
   opacity: .9;
 }

@@ -1,44 +1,32 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import Logo from "./Logo";
 import { navigation } from "@/lib/navigation";
 
 export default function Sidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside
-      style={{
-        width: 260,
-        background: "#08111F",
-        padding: 24,
-        borderRight: "1px solid #1e293b",
-      }}
-    >
+    <aside className="sidebar">
       <Logo />
 
-      <nav
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-          marginTop: 40,
-        }}
-      >
+      <nav className="sidebar-nav">
         {navigation.map((item) => {
           const Icon = item.icon;
+          const active = pathname === item.href;
 
           return (
-            <div
-              key={item.title}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                cursor: "pointer",
-                opacity: 0.85,
-              }}
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`sidebar-item ${active ? "active" : ""}`}
             >
               <Icon size={18} />
-
-              <span>{item.title}</span>
-            </div>
+              <span>{item.label}</span>
+            </Link>
           );
         })}
       </nav>
