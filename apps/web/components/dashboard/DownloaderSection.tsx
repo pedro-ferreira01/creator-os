@@ -1,3 +1,5 @@
+import { forwardRef } from "react";
+
 import Card from "@/components/ui/Card";
 
 import {
@@ -20,15 +22,21 @@ type DownloaderSectionProps = {
   onPrimaryAction: (id: string) => void;
 };
 
-export default function DownloaderSection({
+const DownloaderSection = forwardRef<
+  HTMLElement,
+  DownloaderSectionProps
+>(function DownloaderSection({
   downloads,
   onCreate,
   onDelete,
   onPrimaryAction,
-}: DownloaderSectionProps) {
+}: DownloaderSectionProps, ref) {
   return (
     <div id="downloader-section">
-  <Card title="Downloader">
+ <Card
+  ref={ref}
+  title="Downloader"
+>
       <DownloaderForm
         onCreate={onCreate}
       />
@@ -41,4 +49,5 @@ export default function DownloaderSection({
     </Card>
 </div>
   );
-}
+});
+export default DownloaderSection;

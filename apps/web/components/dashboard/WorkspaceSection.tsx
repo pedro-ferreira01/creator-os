@@ -1,5 +1,8 @@
-import { useEffect, useRef } from "react";
-
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+} from "react";
 import Card from "@/components/ui/Card";
 import SearchInput from "@/components/ui/SearchInput";
 import Select from "@/components/ui/Select";
@@ -52,7 +55,10 @@ type WorkspaceSectionProps = {
 };
 
 
-export default function WorkspaceSection({
+const WorkspaceSection = forwardRef<
+  HTMLElement,
+  WorkspaceSectionProps
+>(function WorkspaceSection({
   search,
   setSearch,
 
@@ -89,7 +95,7 @@ export default function WorkspaceSection({
   
   focusSearch,
   focusProjectName,
-}: WorkspaceSectionProps) {
+}: WorkspaceSectionProps, ref) {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,7 +106,10 @@ useEffect(() => {
 }, [focusSearch]);
   return (
     <div id="workspace-section">
-  <Card title="Workspace">
+  <Card
+  ref={ref}
+  title="Workspace"
+>
       <div
         style={{
           display: "flex",
@@ -173,5 +182,8 @@ useEffect(() => {
       />
     </Card>
 </div>
-  );
-}
+
+   );
+});
+
+export default WorkspaceSection;
