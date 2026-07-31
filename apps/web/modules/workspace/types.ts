@@ -24,4 +24,6 @@ export interface WorkspaceProject {
   progress: number;
 
   updatedAt: string;
+
+  pinned: boolean;
 }

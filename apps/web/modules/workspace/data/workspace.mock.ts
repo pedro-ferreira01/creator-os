@@ -10,6 +10,7 @@ export const workspaceProjects: WorkspaceProject[] = [
     priority: "Alta",
     progress: 68,
     updatedAt: "Hoje",
+    pinned: false,
   },
   {
     id: "2",
@@ -20,6 +21,7 @@ export const workspaceProjects: WorkspaceProject[] = [
     priority: "Média",
     progress: 15,
     updatedAt: "Ontem",
+    pinned: false,
   },
   {
     id: "3",
@@ -30,5 +32,6 @@ export const workspaceProjects: WorkspaceProject[] = [
     priority: "Baixa",
     progress: 8,
     updatedAt: "3 dias atrás",
+    pinned: false,
   },
 ];

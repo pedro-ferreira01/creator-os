@@ -4,24 +4,33 @@ import type { WorkspaceProject } from "../types";
 
 type WorkspaceListProps = {
   projects: WorkspaceProject[];
+
   onDelete: (id: string) => void;
+
   onEdit: (project: WorkspaceProject) => void;
+
+  onTogglePin: (
+    project: WorkspaceProject
+  ) => void;
 };
 
 export default function WorkspaceList({
   projects,
   onDelete,
   onEdit,
+  onTogglePin,
 }: WorkspaceListProps) {
   return (
     <div className="list">
       {projects.map((project) => (
-  <WorkspaceCard
-  key={project.id}
-  project={project}
-  onDelete={onDelete}
-  onEdit={onEdit}
-/>   ))}
+        <WorkspaceCard
+          key={project.id}
+          project={project}
+          onDelete={onDelete}
+          onEdit={onEdit}
+          onTogglePin={onTogglePin}
+        />
+      ))}
     </div>
   );
 }

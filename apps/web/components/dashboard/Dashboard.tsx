@@ -2,11 +2,6 @@
 
 import { useState } from "react";
 
-import type { WorkspaceProject } from "@/modules/workspace";
-
-import { useWorkspace } from "@/modules/workspace";
-import { useDownloader } from "@/modules/downloader";
-
 import {
   DashboardHeader,
   DashboardStats,
@@ -16,18 +11,26 @@ import {
   DownloaderSection,
 } from "@/components/dashboard";
 
+import CommandPalette from "@/components/ui/CommandPalette";
+import Toast from "@/components/ui/Toast";
+
+import {
+  useWorkspace,
+  type WorkspaceProject,
+} from "@/modules/workspace";
+
+import { useDownloader } from "@/modules/downloader";
+
 import {
   recentProjects,
   dailyMission,
 } from "@/lib/dashboard-data";
 
-import Toast from "@/components/ui/Toast";
-import CommandPalette from "@/components/ui/CommandPalette";
-
 import { useToast } from "@/hooks/useToast";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
 import { useWorkspaceController } from "@/hooks/useWorkspaceController";
+import { useCommandActions } from "@/hooks/useCommandActions";
 
 export default function Dashboard() {
   // ==========================
@@ -35,11 +38,12 @@ export default function Dashboard() {
   // ==========================
 
   const {
-    projects,
-    createProject,
-    updateProject,
-    deleteProject,
-  } = useWorkspace();
+  projects,
+  createProject,
+  updateProject,
+  deleteProject,
+  togglePin,
+} = useWorkspace();
 
   const {
     showCreateForm,
@@ -127,67 +131,14 @@ export default function Dashboard() {
     setFocusProjectName,
   ] = useState(false);
 
-  // ==========================
-  // Commands
-  // ==========================
-
-  function handleCommand(action: string) {
-    closePalette();
-
-    switch (action) {
-      case "dashboard":
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-        break;
-
-      case "workspace":
-        setFocusWorkspaceSearch(true);
-
-        document
-          .getElementById("workspace-section")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-
-        break;
-
-      case "downloader":
-        document
-          .getElementById("downloader-section")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-
-        break;
-
-      case "new-project":
-        setShowCreateForm(true);
-
-        setFocusProjectName(true);
-
-        document
-          .getElementById("workspace-section")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-
-        break;
-
-      case "new-download":
-        alert(
-          "Novo Download (será conectado na próxima Sprint)"
-        );
-        break;
-
-      default:
-        console.log(action);
-    }
-  }
+  const {
+    executeCommand,
+  } = useCommandActions({
+    closePalette,
+    setShowCreateForm,
+    setFocusWorkspaceSearch,
+    setFocusProjectName,
+  });
 
   // ==========================
   // Workspace Actions
@@ -202,12 +153,15 @@ export default function Dashboard() {
       ? editingDescription
       : projectDescription;
 
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      return;
+    }
 
     if (editingProjectId) {
       updateProject({
         ...projects.find(
-          (p) => p.id === editingProjectId
+          (project) =>
+            project.id === editingProjectId
         )!,
         name,
         description:
@@ -221,16 +175,16 @@ export default function Dashboard() {
     }
 
     const newProject: WorkspaceProject = {
-      id: crypto.randomUUID(),
-      name,
-      description:
-        description || "Sem descrição",
-      category: "Workspace",
-      status: "Planejamento",
-      priority: "Média",
-      progress: 0,
-      updatedAt: "Agora",
-    };
+  id: crypto.randomUUID(),
+  name,
+  description: description || "Sem descrição",
+  category: "Workspace",
+  status: "Planejamento",
+  priority: "Média",
+  progress: 0,
+  updatedAt: "Agora",
+  pinned: false,
+};
 
     createProject(newProject);
 
@@ -238,6 +192,8 @@ export default function Dashboard() {
     setProjectDescription("");
 
     setShowCreateForm(false);
+
+    showToast("Projeto criado com sucesso.");
   }
 
   function handleStartEdit(
@@ -264,14 +220,30 @@ export default function Dashboard() {
     setShowCreateForm(false);
   }
 
-  function handleDeleteProject(id: string) {
+  function handleDeleteProject(
+    id: string
+  ) {
     deleteProject(id);
+
+    showToast("Projeto removido.");
   }
+
+
+  function handleTogglePin(
+  project: WorkspaceProject
+) {
+  togglePin(project.id);
+
+  showToast(
+    project.pinned
+      ? "Projeto desafixado."
+      : "Projeto fixado."
+  );
+}
 
   // ==========================
   // Render
   // ==========================
-
   return (
     <>
       <Toast
@@ -284,7 +256,9 @@ export default function Dashboard() {
         subtitle="Bem-vindo ao CreatorOS, Sr. Finch. Seu ambiente de trabalho está pronto."
       />
 
-      <DashboardStats stats={stats} />
+      <DashboardStats
+        stats={stats}
+      />
 
       <div className="dashboard-grid">
         <RecentProjectsCard
@@ -296,65 +270,93 @@ export default function Dashboard() {
         />
 
         <WorkspaceSection
-          showCreateForm={showCreateForm}
-          editingProjectId={
-            editingProjectId
-          }
-          projectName={projectName}
-          projectDescription={
-            projectDescription
-          }
-          editingName={editingName}
-          editingDescription={
-            editingDescription
-          }
-          setProjectName={
-            setProjectName
-          }
-          setProjectDescription={
-            setProjectDescription
-          }
-          setEditingName={
-            setEditingName
-          }
-          setEditingDescription={
-            setEditingDescription
-          }
-          handleCreateProject={
-            handleCreateProject
-          }
-          onToggleCreateForm={() =>
-            setShowCreateForm(
-              (current) => !current
-            )
-          }
-          projects={filteredProjects}
-          onDelete={handleDeleteProject}
-          onEdit={handleStartEdit}
-          search={search}
-          setSearch={setSearch}
-          statusFilter={statusFilter}
-          setStatusFilter={
-            setStatusFilter
-          }
-          priorityFilter={
-            priorityFilter
-          }
-          setPriorityFilter={
-            setPriorityFilter
-          }
-          focusSearch={
-            focusWorkspaceSearch
-          }
-          focusProjectName={
-            focusProjectName
-          }
-        />
+  showCreateForm={
+    showCreateForm
+  }
+  editingProjectId={
+    editingProjectId
+  }
+  projectName={
+    projectName
+  }
+  projectDescription={
+    projectDescription
+  }
+  editingName={
+    editingName
+  }
+  editingDescription={
+    editingDescription
+  }
+  setProjectName={
+    setProjectName
+  }
+  setProjectDescription={
+    setProjectDescription
+  }
+  setEditingName={
+    setEditingName
+  }
+  setEditingDescription={
+    setEditingDescription
+  }
+  handleCreateProject={
+    handleCreateProject
+  }
+  onToggleCreateForm={() =>
+    setShowCreateForm(
+      (current) => !current
+    )
+  }
+  projects={
+    filteredProjects
+  }
+  onDelete={
+    handleDeleteProject
+  }
+  onEdit={
+    handleStartEdit
+  }
+onTogglePin={
+  handleTogglePin
+}
+
+
+  onCancelEdit={
+    handleCancelEdit
+  }
+  search={search}
+  setSearch={
+    setSearch
+  }
+  statusFilter={
+    statusFilter
+  }
+  setStatusFilter={
+    setStatusFilter
+  }
+  priorityFilter={
+    priorityFilter
+  }
+  setPriorityFilter={
+    setPriorityFilter
+  }
+  focusSearch={
+    focusWorkspaceSearch
+  }
+  focusProjectName={
+    focusProjectName
+  }
+/>
 
         <DownloaderSection
           downloads={downloads}
-          onCreate={createDownload}
-          onDelete={deleteDownload}
+          onCreate={
+            createDownload
+          }
+          onDelete={
+            deleteDownload
+          }
           onPrimaryAction={
             handlePrimaryAction
           }
@@ -362,9 +364,12 @@ export default function Dashboard() {
 
         <CommandPalette
           open={open}
-          onExecute={handleCommand}
+          onExecute={
+            executeCommand
+          }
         />
       </div>
     </>
   );
 }
+
