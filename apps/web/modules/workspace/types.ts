@@ -26,4 +26,18 @@ export interface WorkspaceProject {
   updatedAt: string;
 
   pinned: boolean;
+
+  favorite: boolean;
+
+  archived: boolean;
+
+  owner: string;
+
+  createdAt: string;
+
+  dueDate: string | null;
+
+  color: string;
+
+  tags: string[];
 }

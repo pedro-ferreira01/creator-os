@@ -18,6 +18,10 @@ type WorkspaceCardProps = {
   onEdit: (project: WorkspaceProject) => void;
 
   onTogglePin: (project: WorkspaceProject) => void;
+
+  onToggleFavorite: (
+    project: WorkspaceProject
+  ) => void;
 };
 
 export default function WorkspaceCard({
@@ -25,6 +29,7 @@ export default function WorkspaceCard({
   onDelete,
   onEdit,
   onTogglePin,
+  onToggleFavorite,
 }: WorkspaceCardProps) {
   return (
     <div
@@ -40,20 +45,41 @@ export default function WorkspaceCard({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 12,
         }}
       >
         <strong>
           {project.pinned ? "📌 " : ""}
+          {project.favorite ? "⭐ " : ""}
           {project.name}
         </strong>
 
-        <Button
-          onClick={() => onTogglePin(project)}
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+          }}
         >
-          {project.pinned
-            ? "Desafixar"
-            : "Fixar"}
-        </Button>
+          <Button
+            onClick={() =>
+              onToggleFavorite(project)
+            }
+          >
+            {project.favorite
+              ? "Favorito"
+              : "Favoritar"}
+          </Button>
+
+          <Button
+            onClick={() =>
+              onTogglePin(project)
+            }
+          >
+            {project.pinned
+              ? "Desafixar"
+              : "Fixar"}
+          </Button>
+        </div>
       </div>
 
       <span>{project.description}</span>
@@ -83,7 +109,9 @@ export default function WorkspaceCard({
         </Badge>
       </div>
 
-      <ProgressBar value={project.progress} />
+      <ProgressBar
+        value={project.progress}
+      />
 
       <MetaText>
         Progresso: {project.progress}% • Atualizado:{" "}

@@ -13,66 +13,100 @@ export function useWorkspaceController({
   // UI
   // ==========================
 
-  const [showCreateForm, setShowCreateForm] =
-    useState(false);
+  const [
+    showCreateForm,
+    setShowCreateForm,
+  ] = useState(false);
 
   // ==========================
   // Filtros
   // ==========================
 
-  const [search, setSearch] =
-    useState("");
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  const [statusFilter, setStatusFilter] =
-    useState("Todos");
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState("Todos");
 
-  const [priorityFilter, setPriorityFilter] =
-    useState("Todas");
+  const [
+    priorityFilter,
+    setPriorityFilter,
+  ] = useState("Todas");
 
   // ==========================
   // Formulário
   // ==========================
 
-  const [projectName, setProjectName] =
-    useState("");
+  const [
+    projectName,
+    setProjectName,
+  ] = useState("");
 
-  const [projectDescription, setProjectDescription] =
-    useState("");
+  const [
+    projectDescription,
+    setProjectDescription,
+  ] = useState("");
 
-  const [editingProjectId, setEditingProjectId] =
-    useState<string | null>(null);
+  const [
+    editingProjectId,
+    setEditingProjectId,
+  ] = useState<string | null>(null);
 
-  const [editingName, setEditingName] =
-    useState("");
+  const [
+    editingName,
+    setEditingName,
+  ] = useState("");
 
-  const [editingDescription, setEditingDescription] =
-    useState("");
+  const [
+    editingDescription,
+    setEditingDescription,
+  ] = useState("");
 
   // ==========================
   // Projetos filtrados
   // ==========================
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const matchesSearch =
-        project.name
-          .toLowerCase()
-          .includes(search.toLowerCase());
+    const filtered = projects.filter(
+      (project) => {
+        const matchesSearch =
+          project.name
+            .toLowerCase()
+            .includes(
+              search.toLowerCase()
+            );
 
-      const matchesStatus =
-        statusFilter === "Todos" ||
-        project.status === statusFilter;
+        const matchesStatus =
+          statusFilter === "Todos" ||
+          project.status === statusFilter;
 
-      const matchesPriority =
-        priorityFilter === "Todas" ||
-        project.priority === priorityFilter;
+        const matchesPriority =
+          priorityFilter ===
+            "Todas" ||
+          project.priority ===
+            priorityFilter;
 
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesPriority
-      );
-    });
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesPriority
+        );
+      }
+    );
+
+    return [...filtered].sort(
+      (a, b) => {
+        if (a.pinned === b.pinned) {
+          return 0;
+        }
+
+        return a.pinned ? -1 : 1;
+      }
+    );
   }, [
     projects,
     search,

@@ -13,50 +13,111 @@ export function useDashboardStats({
   downloads,
 }: Props) {
   return useMemo(() => {
-  const downloading = downloads.filter(
-    (item) => item.status === "Baixando"
-  ).length;
+    // ==========================
+    // Downloads
+    // ==========================
 
-  const completed = downloads.filter(
-    (item) => item.status === "Concluído"
-  ).length;
+    const downloading = downloads.filter(
+      (download) =>
+        download.status === "Baixando"
+    ).length;
 
-  const activeProjects = projects.filter(
-    (project) => project.progress < 100
-  ).length;
+    const completedDownloads =
+      downloads.filter(
+        (download) =>
+          download.status === "Concluído"
+      ).length;
 
-  const totalProgress =
-  downloads.reduce(
-    (total, download) => total + download.progress,
-    0
-  );
+    const totalDownloadProgress =
+      downloads.reduce(
+        (total, download) =>
+          total + download.progress,
+        0
+      );
 
-const averageProgress =
-  downloads.length === 0
-    ? 0
-    : Math.round(totalProgress / downloads.length);
+    const averageDownloadProgress =
+      downloads.length === 0
+        ? 0
+        : Math.round(
+            totalDownloadProgress /
+              downloads.length
+          );
 
-  return [
-    {
-      title: "Downloads",
-      value: downloads.length,
-     description: `${completed} concluídos • ${downloading} em andamento • ${averageProgress}% médio`,
-    },
-    {
-      title: "Projetos",
-      value: projects.length,
-      description: `${activeProjects} ativos`,
-    },
-    {
-      title: "IA",
-      value: 0,
-      description: "Em breve",
-    },
-    {
-      title: "Receita",
-      value: "R$ 0",
-      description: "Em breve",
-    },
-  ];
-}, [projects, downloads]);
+    // ==========================
+    // Workspace
+    // ==========================
+
+    const completedProjects =
+      projects.filter(
+        (project) =>
+          project.status === "Concluído"
+      ).length;
+
+    const activeProjects =
+      projects.filter(
+        (project) =>
+          project.status !== "Concluído"
+      ).length;
+
+    const pinnedProjects =
+      projects.filter(
+        (project) => project.pinned
+      ).length;
+
+    const totalProjectProgress =
+      projects.reduce(
+        (total, project) =>
+          total + project.progress,
+        0
+      );
+
+    const averageProjectProgress =
+      projects.length === 0
+        ? 0
+        : Math.round(
+            totalProjectProgress /
+              projects.length
+          );
+
+    return [
+      {
+        title: "Downloads",
+
+        value: downloads.length,
+
+        description:
+          `${completedDownloads} concluídos • ` +
+          `${downloading} ativos • ` +
+          `${averageDownloadProgress}% médio`,
+      },
+
+      {
+        title: "Projetos",
+
+        value: projects.length,
+
+        description:
+          `${activeProjects} ativos • ` +
+          `${completedProjects} concluídos`,
+      },
+
+      {
+        title: "Fixados",
+
+        value: pinnedProjects,
+
+        description:
+          `${averageProjectProgress}% progresso médio`,
+      },
+
+      {
+        title: "Receita",
+
+        value: "R$ 0",
+
+        description:
+          "Módulo Financeiro (Sprint futura)",
+      },
+    ];
+  }, [projects, downloads]);
 }

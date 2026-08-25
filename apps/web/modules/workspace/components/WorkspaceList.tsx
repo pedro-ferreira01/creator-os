@@ -12,6 +12,10 @@ type WorkspaceListProps = {
   onTogglePin: (
     project: WorkspaceProject
   ) => void;
+
+  onToggleFavorite: (
+    project: WorkspaceProject
+  ) => void;
 };
 
 export default function WorkspaceList({
@@ -19,6 +23,7 @@ export default function WorkspaceList({
   onDelete,
   onEdit,
   onTogglePin,
+  onToggleFavorite,
 }: WorkspaceListProps) {
   return (
     <div className="list">
@@ -29,6 +34,9 @@ export default function WorkspaceList({
           onDelete={onDelete}
           onEdit={onEdit}
           onTogglePin={onTogglePin}
+          onToggleFavorite={
+            onToggleFavorite
+          }
         />
       ))}
     </div>

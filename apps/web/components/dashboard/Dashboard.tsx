@@ -38,12 +38,13 @@ export default function Dashboard() {
   // ==========================
 
   const {
-  projects,
-  createProject,
-  updateProject,
-  deleteProject,
-  togglePin,
-} = useWorkspace();
+    projects,
+    createProject,
+    updateProject,
+    deleteProject,
+    togglePin,
+    toggleFavorite,
+  } = useWorkspace();
 
   const {
     showCreateForm,
@@ -175,16 +176,41 @@ export default function Dashboard() {
     }
 
     const newProject: WorkspaceProject = {
-  id: crypto.randomUUID(),
-  name,
-  description: description || "Sem descrição",
-  category: "Workspace",
-  status: "Planejamento",
-  priority: "Média",
-  progress: 0,
-  updatedAt: "Agora",
-  pinned: false,
-};
+      id: crypto.randomUUID(),
+
+      name,
+
+      description:
+        description || "Sem descrição",
+
+      category: "Workspace",
+
+      status: "Planejamento",
+
+      priority: "Média",
+
+      progress: 0,
+
+      updatedAt: "Agora",
+
+      pinned: false,
+
+      favorite: false,
+
+      archived: false,
+
+      owner: "Sr. Finch",
+
+      createdAt: new Date()
+        .toISOString()
+        .substring(0, 10),
+
+      dueDate: null,
+
+      color: "#3b82f6",
+
+      tags: [],
+    };
 
     createProject(newProject);
 
@@ -193,7 +219,9 @@ export default function Dashboard() {
 
     setShowCreateForm(false);
 
-    showToast("Projeto criado com sucesso.");
+    showToast(
+      "Projeto criado com sucesso."
+    );
   }
 
   function handleStartEdit(
@@ -228,22 +256,34 @@ export default function Dashboard() {
     showToast("Projeto removido.");
   }
 
-
   function handleTogglePin(
-  project: WorkspaceProject
-) {
-  togglePin(project.id);
+    project: WorkspaceProject
+  ) {
+    togglePin(project.id);
 
-  showToast(
-    project.pinned
-      ? "Projeto desafixado."
-      : "Projeto fixado."
-  );
-}
+    showToast(
+      project.pinned
+        ? "Projeto desafixado."
+        : "Projeto fixado."
+    );
+  }
+
+  function handleToggleFavorite(
+    project: WorkspaceProject
+  ) {
+    toggleFavorite(project.id);
+
+    showToast(
+      project.favorite
+        ? "Projeto removido dos favoritos."
+        : "Projeto favoritado."
+    );
+  }
 
   // ==========================
   // Render
   // ==========================
+
   return (
     <>
       <Toast
@@ -270,84 +310,83 @@ export default function Dashboard() {
         />
 
         <WorkspaceSection
-  showCreateForm={
-    showCreateForm
-  }
-  editingProjectId={
-    editingProjectId
-  }
-  projectName={
-    projectName
-  }
-  projectDescription={
-    projectDescription
-  }
-  editingName={
-    editingName
-  }
-  editingDescription={
-    editingDescription
-  }
-  setProjectName={
-    setProjectName
-  }
-  setProjectDescription={
-    setProjectDescription
-  }
-  setEditingName={
-    setEditingName
-  }
-  setEditingDescription={
-    setEditingDescription
-  }
-  handleCreateProject={
-    handleCreateProject
-  }
-  onToggleCreateForm={() =>
-    setShowCreateForm(
-      (current) => !current
-    )
-  }
-  projects={
-    filteredProjects
-  }
-  onDelete={
-    handleDeleteProject
-  }
-  onEdit={
-    handleStartEdit
-  }
-onTogglePin={
-  handleTogglePin
-}
-
-
-  onCancelEdit={
-    handleCancelEdit
-  }
-  search={search}
-  setSearch={
-    setSearch
-  }
-  statusFilter={
-    statusFilter
-  }
-  setStatusFilter={
-    setStatusFilter
-  }
-  priorityFilter={
-    priorityFilter
-  }
-  setPriorityFilter={
-    setPriorityFilter
-  }
-  focusSearch={
-    focusWorkspaceSearch
-  }
-  focusProjectName={
-    focusProjectName
-  }
-/>
+          showCreateForm={
+            showCreateForm
+          }
+          editingProjectId={
+            editingProjectId
+          }
+          projectName={
+            projectName
+          }
+          projectDescription={
+            projectDescription
+          }
+          editingName={
+            editingName
+          }
+          editingDescription={
+            editingDescription
+          }
+          setProjectName={
+            setProjectName
+          }
+          setProjectDescription={
+            setProjectDescription
+          }
+          setEditingName={
+            setEditingName
+          }
+          setEditingDescription={
+            setEditingDescription
+          }
+          handleCreateProject={
+            handleCreateProject
+          }
+          onToggleCreateForm={() =>
+            setShowCreateForm(
+              (current) => !current
+            )
+          }
+          projects={
+            filteredProjects
+          }
+          onDelete={
+            handleDeleteProject
+          }
+          onEdit={
+            handleStartEdit
+          }
+          onTogglePin={
+            handleTogglePin
+          }
+          onToggleFavorite={
+            handleToggleFavorite
+          }
+          onCancelEdit={
+            handleCancelEdit
+          }
+          search={search}
+          setSearch={setSearch}
+          statusFilter={
+            statusFilter
+          }
+          setStatusFilter={
+            setStatusFilter
+          }
+          priorityFilter={
+            priorityFilter
+          }
+          setPriorityFilter={
+            setPriorityFilter
+          }
+          focusSearch={
+            focusWorkspaceSearch
+          }
+          focusProjectName={
+            focusProjectName
+          }
+        />
 
         <DownloaderSection
           downloads={downloads}
@@ -372,4 +411,3 @@ onTogglePin={
     </>
   );
 }
-

@@ -78,6 +78,27 @@ export function useWorkspace() {
     );
   }
 
+  function toggleFavorite(
+    id: string
+  ) {
+    const updatedProjects = projects.map(
+      (project) =>
+        project.id === id
+          ? {
+              ...project,
+              favorite:
+                !project.favorite,
+            }
+          : project
+    );
+
+    setProjects(updatedProjects);
+
+    workspaceService.saveProjects(
+      updatedProjects
+    );
+  }
+
   return {
     projects,
 
@@ -90,5 +111,7 @@ export function useWorkspace() {
     deleteProject,
 
     togglePin,
+
+    toggleFavorite,
   };
 }

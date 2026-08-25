@@ -10,7 +10,23 @@ export const workspaceProjects: WorkspaceProject[] = [
     priority: "Alta",
     progress: 68,
     updatedAt: "Hoje",
+
     pinned: false,
+    favorite: true,
+    archived: false,
+
+    owner: "Sr. Finch",
+
+    createdAt: "2026-08-01",
+
+    dueDate: null,
+
+    color: "#3b82f6",
+
+    tags: [
+      "Core",
+      "MVP",
+    ],
   },
   {
     id: "2",
@@ -21,7 +37,22 @@ export const workspaceProjects: WorkspaceProject[] = [
     priority: "Média",
     progress: 15,
     updatedAt: "Ontem",
+
     pinned: false,
+    favorite: false,
+    archived: false,
+
+    owner: "Sr. Finch",
+
+    createdAt: "2026-08-02",
+
+    dueDate: null,
+
+    color: "#10b981",
+
+    tags: [
+      "Marketing",
+    ],
   },
   {
     id: "3",
@@ -32,6 +63,21 @@ export const workspaceProjects: WorkspaceProject[] = [
     priority: "Baixa",
     progress: 8,
     updatedAt: "3 dias atrás",
+
     pinned: false,
+    favorite: false,
+    archived: false,
+
+    owner: "Sr. Finch",
+
+    createdAt: "2026-08-03",
+
+    dueDate: null,
+
+    color: "#f59e0b",
+
+    tags: [
+      "Educação",
+    ],
   },
 ];
