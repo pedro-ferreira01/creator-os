@@ -22,6 +22,10 @@ type WorkspaceCardProps = {
   onToggleFavorite: (
     project: WorkspaceProject
   ) => void;
+
+  onToggleArchive: (
+    project: WorkspaceProject
+  ) => void;
 };
 
 export default function WorkspaceCard({
@@ -30,6 +34,7 @@ export default function WorkspaceCard({
   onEdit,
   onTogglePin,
   onToggleFavorite,
+  onToggleArchive,
 }: WorkspaceCardProps) {
   return (
     <div
@@ -129,6 +134,16 @@ export default function WorkspaceCard({
           onClick={() => onEdit(project)}
         >
           Editar
+        </Button>
+
+        <Button
+          onClick={() =>
+            onToggleArchive(project)
+          }
+        >
+          {project.archived
+            ? "Restaurar"
+            : "Arquivar"}
         </Button>
 
         <Button

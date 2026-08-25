@@ -99,6 +99,25 @@ export function useWorkspace() {
     );
   }
 
+  function toggleArchive(id: string) {
+    const updatedProjects = projects.map(
+      (project) =>
+        project.id === id
+          ? {
+              ...project,
+              archived:
+                !project.archived,
+            }
+          : project
+    );
+
+    setProjects(updatedProjects);
+
+    workspaceService.saveProjects(
+      updatedProjects
+    );
+  }
+
   return {
     projects,
 
@@ -113,5 +132,7 @@ export function useWorkspace() {
     togglePin,
 
     toggleFavorite,
+
+    toggleArchive,
   };
 }

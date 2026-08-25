@@ -38,46 +38,47 @@ export default function Dashboard() {
   // ==========================
 
   const {
-    projects,
-    createProject,
-    updateProject,
-    deleteProject,
-    togglePin,
-    toggleFavorite,
-  } = useWorkspace();
+  projects,
+  createProject,
+  updateProject,
+  deleteProject,
+  togglePin,
+  toggleFavorite,
+  toggleArchive,
+} = useWorkspace();
 
-  const {
-    showCreateForm,
-    setShowCreateForm,
+const {
+  showCreateForm,
+  setShowCreateForm,
 
-    search,
-    setSearch,
+  search,
+  setSearch,
 
-    statusFilter,
-    setStatusFilter,
+  statusFilter,
+  setStatusFilter,
 
-    priorityFilter,
-    setPriorityFilter,
+  priorityFilter,
+  setPriorityFilter,
 
-    projectName,
-    setProjectName,
+  projectName,
+  setProjectName,
 
-    projectDescription,
-    setProjectDescription,
+  projectDescription,
+  setProjectDescription,
 
-    editingProjectId,
-    setEditingProjectId,
+  editingProjectId,
+  setEditingProjectId,
 
-    editingName,
-    setEditingName,
+  editingName,
+  setEditingName,
 
-    editingDescription,
-    setEditingDescription,
+  editingDescription,
+  setEditingDescription,
 
-    filteredProjects,
-  } = useWorkspaceController({
-    projects,
-  });
+  filteredProjects,
+} = useWorkspaceController({
+  projects,
+});
 
   // ==========================
   // Downloader
@@ -280,6 +281,19 @@ export default function Dashboard() {
     );
   }
 
+
+  function handleToggleArchive(
+  project: WorkspaceProject
+) {
+  toggleArchive(project.id);
+
+  showToast(
+    project.archived
+      ? "Projeto restaurado."
+      : "Projeto arquivado."
+  );
+}
+
   // ==========================
   // Render
   // ==========================
@@ -361,11 +375,14 @@ export default function Dashboard() {
             handleTogglePin
           }
           onToggleFavorite={
-            handleToggleFavorite
-          }
-          onCancelEdit={
-            handleCancelEdit
-          }
+  handleToggleFavorite
+}
+onToggleArchive={
+  handleToggleArchive
+}
+onCancelEdit={
+  handleCancelEdit
+}
           search={search}
           setSearch={setSearch}
           statusFilter={

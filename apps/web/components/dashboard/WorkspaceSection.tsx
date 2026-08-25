@@ -66,6 +66,10 @@ type WorkspaceSectionProps = {
     project: WorkspaceProject
   ) => void;
 
+  onToggleArchive: (
+    project: WorkspaceProject
+  ) => void;
+
   focusSearch?: boolean;
 
   focusProjectName?: boolean;
@@ -111,6 +115,7 @@ const WorkspaceSection = forwardRef<
     onEdit,
     onTogglePin,
     onToggleFavorite,
+    onToggleArchive,
 
     focusSearch,
     focusProjectName,
@@ -238,6 +243,9 @@ const WorkspaceSection = forwardRef<
           onTogglePin={onTogglePin}
           onToggleFavorite={
             onToggleFavorite
+          }
+          onToggleArchive={
+            onToggleArchive
           }
         />
       </Card>
