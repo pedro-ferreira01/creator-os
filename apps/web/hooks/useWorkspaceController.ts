@@ -37,6 +37,11 @@ export function useWorkspaceController({
     setPriorityFilter,
   ] = useState("Todas");
 
+  const [
+    archiveFilter,
+    setArchiveFilter,
+  ] = useState("Ativos");
+
   // ==========================
   // Formulário
   // ==========================
@@ -85,15 +90,22 @@ export function useWorkspaceController({
           project.status === statusFilter;
 
         const matchesPriority =
-          priorityFilter ===
-            "Todas" ||
+          priorityFilter === "Todas" ||
           project.priority ===
             priorityFilter;
+
+        const matchesArchive =
+          archiveFilter === "Todos" ||
+          (archiveFilter === "Ativos" &&
+            !project.archived) ||
+          (archiveFilter === "Arquivados" &&
+            project.archived);
 
         return (
           matchesSearch &&
           matchesStatus &&
-          matchesPriority
+          matchesPriority &&
+          matchesArchive
         );
       }
     );
@@ -112,6 +124,7 @@ export function useWorkspaceController({
     search,
     statusFilter,
     priorityFilter,
+    archiveFilter,
   ]);
 
   return {
@@ -128,6 +141,9 @@ export function useWorkspaceController({
 
     priorityFilter,
     setPriorityFilter,
+
+    archiveFilter,
+    setArchiveFilter,
 
     // Formulário
     projectName,

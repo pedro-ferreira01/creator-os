@@ -28,6 +28,9 @@ type WorkspaceSectionProps = {
   priorityFilter: string;
   setPriorityFilter: (value: string) => void;
 
+  archiveFilter: string;
+setArchiveFilter: (value: string) => void;
+
   showCreateForm: boolean;
 
   editingProjectId: string | null;
@@ -88,6 +91,9 @@ const WorkspaceSection = forwardRef<
 
     priorityFilter,
     setPriorityFilter,
+
+    archiveFilter,
+setArchiveFilter,
 
     showCreateForm,
     editingProjectId,
@@ -153,33 +159,43 @@ const WorkspaceSection = forwardRef<
           />
 
           <div
-            style={{
-              display: "flex",
-              gap: 12,
-            }}
-          >
-            <Select
-              value={statusFilter}
-              onChange={setStatusFilter}
-              options={[
-                "Todos",
-                "Planejamento",
-                "Em andamento",
-                "Concluído",
-              ]}
-            />
+  style={{
+    display: "flex",
+    gap: 12,
+  }}
+>
+  <Select
+    value={statusFilter}
+    onChange={setStatusFilter}
+    options={[
+      "Todos",
+      "Planejamento",
+      "Em andamento",
+      "Concluído",
+    ]}
+  />
 
-            <Select
-              value={priorityFilter}
-              onChange={setPriorityFilter}
-              options={[
-                "Todas",
-                "Alta",
-                "Média",
-                "Baixa",
-              ]}
-            />
-          </div>
+  <Select
+    value={priorityFilter}
+    onChange={setPriorityFilter}
+    options={[
+      "Todas",
+      "Alta",
+      "Média",
+      "Baixa",
+    ]}
+  />
+
+  <Select
+    value={archiveFilter}
+    onChange={setArchiveFilter}
+    options={[
+      "Ativos",
+      "Arquivados",
+      "Todos",
+    ]}
+  />
+</div>
         </div>
 
         <WorkspaceToolbar

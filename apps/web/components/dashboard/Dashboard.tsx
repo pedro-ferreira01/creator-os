@@ -60,6 +60,9 @@ const {
   priorityFilter,
   setPriorityFilter,
 
+  archiveFilter,
+setArchiveFilter,
+
   projectName,
   setProjectName,
 
@@ -397,6 +400,14 @@ onCancelEdit={
           setPriorityFilter={
             setPriorityFilter
           }
+
+          archiveFilter={
+  archiveFilter
+}
+setArchiveFilter={
+  setArchiveFilter
+}
+
           focusSearch={
             focusWorkspaceSearch
           }
