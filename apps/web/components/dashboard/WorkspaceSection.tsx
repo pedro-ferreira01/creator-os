@@ -29,7 +29,7 @@ type WorkspaceSectionProps = {
   setPriorityFilter: (value: string) => void;
 
   archiveFilter: string;
-setArchiveFilter: (value: string) => void;
+  setArchiveFilter: (value: string) => void;
 
   showCreateForm: boolean;
 
@@ -73,6 +73,16 @@ setArchiveFilter: (value: string) => void;
     project: WorkspaceProject
   ) => void;
 
+  onUpdateStatus: (
+    id: string,
+    status: WorkspaceProject["status"]
+  ) => void;
+
+  onUpdateProgress: (
+    id: string,
+    progress: number
+  ) => void;
+
   focusSearch?: boolean;
 
   focusProjectName?: boolean;
@@ -93,7 +103,7 @@ const WorkspaceSection = forwardRef<
     setPriorityFilter,
 
     archiveFilter,
-setArchiveFilter,
+    setArchiveFilter,
 
     showCreateForm,
     editingProjectId,
@@ -122,6 +132,8 @@ setArchiveFilter,
     onTogglePin,
     onToggleFavorite,
     onToggleArchive,
+    onUpdateStatus,
+    onUpdateProgress,
 
     focusSearch,
     focusProjectName,
@@ -159,43 +171,43 @@ setArchiveFilter,
           />
 
           <div
-  style={{
-    display: "flex",
-    gap: 12,
-  }}
->
-  <Select
-    value={statusFilter}
-    onChange={setStatusFilter}
-    options={[
-      "Todos",
-      "Planejamento",
-      "Em andamento",
-      "Concluído",
-    ]}
-  />
+            style={{
+              display: "flex",
+              gap: 12,
+            }}
+          >
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                "Todos",
+                "Planejamento",
+                "Em andamento",
+                "Concluído",
+              ]}
+            />
 
-  <Select
-    value={priorityFilter}
-    onChange={setPriorityFilter}
-    options={[
-      "Todas",
-      "Alta",
-      "Média",
-      "Baixa",
-    ]}
-  />
+            <Select
+              value={priorityFilter}
+              onChange={setPriorityFilter}
+              options={[
+                "Todas",
+                "Alta",
+                "Média",
+                "Baixa",
+              ]}
+            />
 
-  <Select
-    value={archiveFilter}
-    onChange={setArchiveFilter}
-    options={[
-      "Ativos",
-      "Arquivados",
-      "Todos",
-    ]}
-  />
-</div>
+            <Select
+              value={archiveFilter}
+              onChange={setArchiveFilter}
+              options={[
+                "Ativos",
+                "Arquivados",
+                "Todos",
+              ]}
+            />
+          </div>
         </div>
 
         <WorkspaceToolbar
@@ -262,6 +274,12 @@ setArchiveFilter,
           }
           onToggleArchive={
             onToggleArchive
+          }
+          onUpdateStatus={
+            onUpdateStatus
+          }
+          onUpdateProgress={
+            onUpdateProgress
           }
         />
       </Card>

@@ -2,8 +2,12 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
 import MetaText from "@/components/ui/MetaText";
+import Select from "@/components/ui/Select";
 
-import type { WorkspaceProject } from "../types";
+import type {
+  WorkspaceProject,
+  WorkspaceStatus,
+} from "../types";
 
 import {
   getPriorityColor,
@@ -15,9 +19,13 @@ type WorkspaceCardProps = {
 
   onDelete: (id: string) => void;
 
-  onEdit: (project: WorkspaceProject) => void;
+  onEdit: (
+    project: WorkspaceProject
+  ) => void;
 
-  onTogglePin: (project: WorkspaceProject) => void;
+  onTogglePin: (
+    project: WorkspaceProject
+  ) => void;
 
   onToggleFavorite: (
     project: WorkspaceProject
@@ -25,6 +33,16 @@ type WorkspaceCardProps = {
 
   onToggleArchive: (
     project: WorkspaceProject
+  ) => void;
+
+  onUpdateStatus: (
+    id: string,
+    status: WorkspaceStatus
+  ) => void;
+
+  onUpdateProgress: (
+    id: string,
+    progress: number
   ) => void;
 };
 
@@ -35,6 +53,8 @@ export default function WorkspaceCard({
   onTogglePin,
   onToggleFavorite,
   onToggleArchive,
+  onUpdateStatus,
+  onUpdateProgress,
 }: WorkspaceCardProps) {
   return (
     <div
@@ -99,6 +119,7 @@ export default function WorkspaceCard({
           gap: 12,
           marginTop: 8,
           alignItems: "center",
+          flexWrap: "wrap",
         }}
       >
         <Badge
@@ -112,6 +133,49 @@ export default function WorkspaceCard({
         >
           Prioridade {project.priority}
         </Badge>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          marginTop: 12,
+          alignItems: "center",
+        }}
+      >
+        <Select
+          value={project.status}
+          onChange={(value) =>
+            onUpdateStatus(
+              project.id,
+              value as WorkspaceStatus
+            )
+          }
+          options={[
+            "Planejamento",
+            "Em andamento",
+            "Concluído",
+          ]}
+        />
+
+        <input
+          type="number"
+          min={0}
+          max={100}
+          value={project.progress}
+          onChange={(event) =>
+            onUpdateProgress(
+              project.id,
+              Number(event.target.value)
+            )
+          }
+          style={{
+            width: 80,
+          }}
+          aria-label="Progresso do projeto"
+        />
+
+        <span>%</span>
       </div>
 
       <ProgressBar

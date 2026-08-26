@@ -45,6 +45,8 @@ export default function Dashboard() {
   togglePin,
   toggleFavorite,
   toggleArchive,
+  updateProjectStatus,
+  updateProjectProgress,
 } = useWorkspace();
 
 const {
@@ -297,6 +299,30 @@ setArchiveFilter,
   );
 }
 
+function handleUpdateStatus(
+  id: string,
+  status: WorkspaceProject["status"]
+) {
+  updateProjectStatus(id, status);
+
+  showToast(
+    "Status do projeto atualizado."
+  );
+}
+
+function handleUpdateProgress(
+  id: string,
+  progress: number
+) {
+  updateProjectProgress(id, progress);
+
+  showToast(
+    "Progresso do projeto atualizado."
+  );
+}
+
+
+
   // ==========================
   // Render
   // ==========================
@@ -383,6 +409,15 @@ setArchiveFilter,
 onToggleArchive={
   handleToggleArchive
 }
+
+onUpdateStatus={
+  handleUpdateStatus
+}
+
+onUpdateProgress={
+  handleUpdateProgress
+}
+
 onCancelEdit={
   handleCancelEdit
 }

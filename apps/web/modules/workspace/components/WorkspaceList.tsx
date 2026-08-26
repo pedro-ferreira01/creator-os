@@ -22,6 +22,16 @@ type WorkspaceListProps = {
   onToggleArchive: (
     project: WorkspaceProject
   ) => void;
+
+  onUpdateStatus: (
+    id: string,
+    status: WorkspaceProject["status"]
+  ) => void;
+
+  onUpdateProgress: (
+    id: string,
+    progress: number
+  ) => void;
 };
 
 export default function WorkspaceList({
@@ -31,6 +41,8 @@ export default function WorkspaceList({
   onTogglePin,
   onToggleFavorite,
   onToggleArchive,
+  onUpdateStatus,
+  onUpdateProgress,
 }: WorkspaceListProps) {
   return (
     <div className="list">
@@ -46,6 +58,12 @@ export default function WorkspaceList({
           }
           onToggleArchive={
             onToggleArchive
+          }
+          onUpdateStatus={
+            onUpdateStatus
+          }
+          onUpdateProgress={
+            onUpdateProgress
           }
         />
       ))}

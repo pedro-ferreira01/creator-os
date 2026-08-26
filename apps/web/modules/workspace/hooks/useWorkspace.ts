@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 
 import { workspaceService } from "../services/workspace.service";
 
-import type { WorkspaceProject } from "../types";
+import type {
+  WorkspaceProject,
+  WorkspaceStatus,
+} from "../types";
 
 export function useWorkspace() {
   const [projects, setProjects] = useState<
@@ -118,6 +121,55 @@ export function useWorkspace() {
     );
   }
 
+  function updateProjectStatus(
+    id: string,
+    status: WorkspaceStatus
+  ) {
+    const updatedProjects = projects.map(
+      (project) =>
+        project.id === id
+          ? {
+              ...project,
+              status,
+              updatedAt: "Agora",
+            }
+          : project
+    );
+
+    setProjects(updatedProjects);
+
+    workspaceService.saveProjects(
+      updatedProjects
+    );
+  }
+
+  function updateProjectProgress(
+    id: string,
+    progress: number
+  ) {
+    const normalizedProgress = Math.min(
+      100,
+      Math.max(0, progress)
+    );
+
+    const updatedProjects = projects.map(
+      (project) =>
+        project.id === id
+          ? {
+              ...project,
+              progress: normalizedProgress,
+              updatedAt: "Agora",
+            }
+          : project
+    );
+
+    setProjects(updatedProjects);
+
+    workspaceService.saveProjects(
+      updatedProjects
+    );
+  }
+
   return {
     projects,
 
@@ -134,5 +186,9 @@ export function useWorkspace() {
     toggleFavorite,
 
     toggleArchive,
+
+    updateProjectStatus,
+
+    updateProjectProgress,
   };
 }
