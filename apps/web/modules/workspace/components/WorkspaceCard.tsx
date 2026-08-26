@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
@@ -56,6 +58,48 @@ export default function WorkspaceCard({
   onUpdateStatus,
   onUpdateProgress,
 }: WorkspaceCardProps) {
+  const [progressInput, setProgressInput] =
+    useState(String(project.progress));
+
+  function handleProgressChange(
+    value: string
+  ) {
+    setProgressInput(value);
+  }
+
+  function handleProgressCommit() {
+    const numericValue = Number(
+      progressInput
+    );
+
+    if (Number.isNaN(numericValue)) {
+      setProgressInput(
+        String(project.progress)
+      );
+
+      return;
+    }
+
+    const normalizedProgress = Math.min(
+      100,
+      Math.max(0, numericValue)
+    );
+
+    setProgressInput(
+      String(normalizedProgress)
+    );
+
+    if (
+      normalizedProgress !==
+      project.progress
+    ) {
+      onUpdateProgress(
+        project.id,
+        normalizedProgress
+      );
+    }
+  }
+
   return (
     <div
       className="list-item"
@@ -162,13 +206,18 @@ export default function WorkspaceCard({
           type="number"
           min={0}
           max={100}
-          value={project.progress}
+          value={progressInput}
           onChange={(event) =>
-            onUpdateProgress(
-              project.id,
-              Number(event.target.value)
+            handleProgressChange(
+              event.target.value
             )
           }
+          onBlur={handleProgressCommit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.currentTarget.blur();
+            }
+          }}
           style={{
             width: 80,
           }}
