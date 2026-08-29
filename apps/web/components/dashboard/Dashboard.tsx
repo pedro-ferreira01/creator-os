@@ -38,52 +38,58 @@ export default function Dashboard() {
   // ==========================
 
   const {
-  projects,
-  createProject,
-  updateProject,
-  deleteProject,
-  togglePin,
-  toggleFavorite,
-  toggleArchive,
-  updateProjectStatus,
-  updateProjectProgress,
-} = useWorkspace();
+    projects,
+    createProject,
+    updateProject,
+    deleteProject,
+    togglePin,
+    toggleFavorite,
+    toggleArchive,
+    updateProjectStatus,
+    updateProjectProgress,
+  } = useWorkspace();
 
-const {
-  showCreateForm,
-  setShowCreateForm,
+  const {
+    showCreateForm,
+    setShowCreateForm,
 
-  search,
-  setSearch,
+    search,
+    setSearch,
 
-  statusFilter,
-  setStatusFilter,
+    statusFilter,
+    setStatusFilter,
 
-  priorityFilter,
-  setPriorityFilter,
+    priorityFilter,
+    setPriorityFilter,
 
-  archiveFilter,
-setArchiveFilter,
+    archiveFilter,
+    setArchiveFilter,
 
-  projectName,
-  setProjectName,
+    projectName,
+    setProjectName,
 
-  projectDescription,
-  setProjectDescription,
+    projectDescription,
+    setProjectDescription,
 
-  editingProjectId,
-  setEditingProjectId,
+    projectDueDate,
+    setProjectDueDate,
 
-  editingName,
-  setEditingName,
+    editingProjectId,
+    setEditingProjectId,
 
-  editingDescription,
-  setEditingDescription,
+    editingName,
+    setEditingName,
 
-  filteredProjects,
-} = useWorkspaceController({
-  projects,
-});
+    editingDescription,
+    setEditingDescription,
+
+    editingDueDate,
+    setEditingDueDate,
+
+    filteredProjects,
+  } = useWorkspaceController({
+    projects,
+  });
 
   // ==========================
   // Downloader
@@ -160,23 +166,39 @@ setArchiveFilter,
       ? editingDescription
       : projectDescription;
 
+    const dueDate = editingProjectId
+      ? editingDueDate
+      : projectDueDate;
+
     if (!name.trim()) {
       return;
     }
 
     if (editingProjectId) {
-      updateProject({
-        ...projects.find(
+      const existingProject =
+        projects.find(
           (project) =>
             project.id === editingProjectId
-        )!,
+        );
+
+      if (!existingProject) {
+        return;
+      }
+
+      updateProject({
+        ...existingProject,
         name,
         description:
           description || "Sem descrição",
+        dueDate: dueDate || null,
         updatedAt: "Agora",
       });
 
       handleCancelEdit();
+
+      showToast(
+        "Projeto atualizado com sucesso."
+      );
 
       return;
     }
@@ -211,7 +233,7 @@ setArchiveFilter,
         .toISOString()
         .substring(0, 10),
 
-      dueDate: null,
+      dueDate: dueDate || null,
 
       color: "#3b82f6",
 
@@ -222,6 +244,7 @@ setArchiveFilter,
 
     setProjectName("");
     setProjectDescription("");
+    setProjectDueDate("");
 
     setShowCreateForm(false);
 
@@ -241,6 +264,10 @@ setArchiveFilter,
       project.description
     );
 
+    setEditingDueDate(
+      project.dueDate || ""
+    );
+
     setShowCreateForm(true);
   }
 
@@ -250,6 +277,8 @@ setArchiveFilter,
     setEditingName("");
 
     setEditingDescription("");
+
+    setEditingDueDate("");
 
     setShowCreateForm(false);
   }
@@ -286,42 +315,42 @@ setArchiveFilter,
     );
   }
 
-
   function handleToggleArchive(
-  project: WorkspaceProject
-) {
-  toggleArchive(project.id);
+    project: WorkspaceProject
+  ) {
+    toggleArchive(project.id);
 
-  showToast(
-    project.archived
-      ? "Projeto restaurado."
-      : "Projeto arquivado."
-  );
-}
+    showToast(
+      project.archived
+        ? "Projeto restaurado."
+        : "Projeto arquivado."
+    );
+  }
 
-function handleUpdateStatus(
-  id: string,
-  status: WorkspaceProject["status"]
-) {
-  updateProjectStatus(id, status);
+  function handleUpdateStatus(
+    id: string,
+    status: WorkspaceProject["status"]
+  ) {
+    updateProjectStatus(id, status);
 
-  showToast(
-    "Status do projeto atualizado."
-  );
-}
+    showToast(
+      "Status do projeto atualizado."
+    );
+  }
 
-function handleUpdateProgress(
-  id: string,
-  progress: number
-) {
-  updateProjectProgress(id, progress);
+  function handleUpdateProgress(
+    id: string,
+    progress: number
+  ) {
+    updateProjectProgress(
+      id,
+      progress
+    );
 
-  showToast(
-    "Progresso do projeto atualizado."
-  );
-}
-
-
+    showToast(
+      "Progresso do projeto atualizado."
+    );
+  }
 
   // ==========================
   // Render
@@ -356,96 +385,136 @@ function handleUpdateProgress(
           showCreateForm={
             showCreateForm
           }
+
           editingProjectId={
             editingProjectId
           }
+
           projectName={
             projectName
           }
+
           projectDescription={
             projectDescription
           }
+
+          projectDueDate={
+            projectDueDate
+          }
+
           editingName={
             editingName
           }
+
           editingDescription={
             editingDescription
           }
+
+          editingDueDate={
+            editingDueDate
+          }
+
           setProjectName={
             setProjectName
           }
+
           setProjectDescription={
             setProjectDescription
           }
+
+          setProjectDueDate={
+            setProjectDueDate
+          }
+
           setEditingName={
             setEditingName
           }
+
           setEditingDescription={
             setEditingDescription
           }
+
+          setEditingDueDate={
+            setEditingDueDate
+          }
+
           handleCreateProject={
             handleCreateProject
           }
+
           onToggleCreateForm={() =>
             setShowCreateForm(
               (current) => !current
             )
           }
+
+          onCancelEdit={
+            handleCancelEdit
+          }
+
           projects={
             filteredProjects
           }
+
           onDelete={
             handleDeleteProject
           }
+
           onEdit={
             handleStartEdit
           }
+
           onTogglePin={
             handleTogglePin
           }
+
           onToggleFavorite={
-  handleToggleFavorite
-}
-onToggleArchive={
-  handleToggleArchive
-}
+            handleToggleFavorite
+          }
 
-onUpdateStatus={
-  handleUpdateStatus
-}
+          onToggleArchive={
+            handleToggleArchive
+          }
 
-onUpdateProgress={
-  handleUpdateProgress
-}
+          onUpdateStatus={
+            handleUpdateStatus
+          }
 
-onCancelEdit={
-  handleCancelEdit
-}
+          onUpdateProgress={
+            handleUpdateProgress
+          }
+
           search={search}
           setSearch={setSearch}
+
           statusFilter={
             statusFilter
           }
+
           setStatusFilter={
             setStatusFilter
           }
+
           priorityFilter={
             priorityFilter
           }
+
           setPriorityFilter={
             setPriorityFilter
           }
 
           archiveFilter={
-  archiveFilter
-}
-setArchiveFilter={
-  setArchiveFilter
-}
+            archiveFilter
+          }
+
+          setArchiveFilter={
+            setArchiveFilter
+          }
 
           focusSearch={
             focusWorkspaceSearch
           }
+
           focusProjectName={
             focusProjectName
           }

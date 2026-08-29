@@ -43,7 +43,7 @@ export function useWorkspaceController({
   ] = useState("Ativos");
 
   // ==========================
-  // Formulário
+  // Formulário - criação
   // ==========================
 
   const [
@@ -55,6 +55,15 @@ export function useWorkspaceController({
     projectDescription,
     setProjectDescription,
   ] = useState("");
+
+  const [
+    projectDueDate,
+    setProjectDueDate,
+  ] = useState("");
+
+  // ==========================
+  // Formulário - edição
+  // ==========================
 
   const [
     editingProjectId,
@@ -69,6 +78,11 @@ export function useWorkspaceController({
   const [
     editingDescription,
     setEditingDescription,
+  ] = useState("");
+
+  const [
+    editingDueDate,
+    setEditingDueDate,
   ] = useState("");
 
   // ==========================
@@ -145,13 +159,17 @@ export function useWorkspaceController({
     archiveFilter,
     setArchiveFilter,
 
-    // Formulário
+    // Formulário - criação
     projectName,
     setProjectName,
 
     projectDescription,
     setProjectDescription,
 
+    projectDueDate,
+    setProjectDueDate,
+
+    // Formulário - edição
     editingProjectId,
     setEditingProjectId,
 
@@ -160,6 +178,9 @@ export function useWorkspaceController({
 
     editingDescription,
     setEditingDescription,
+
+    editingDueDate,
+    setEditingDueDate,
 
     // Dados
     filteredProjects,

@@ -16,6 +16,11 @@ import {
   getStatusColor,
 } from "@/lib/workspace-colors";
 
+import {
+  getWorkspaceDeadlineState,
+  getWorkspaceDeadlineLabel,
+} from "@/lib/workspace-deadline";
+
 type WorkspaceCardProps = {
   project: WorkspaceProject;
 
@@ -58,8 +63,16 @@ export default function WorkspaceCard({
   onUpdateStatus,
   onUpdateProgress,
 }: WorkspaceCardProps) {
+  /*
+   * Compatibilidade com projetos antigos salvos
+   * no localStorage antes da existência de tags.
+   */
+  const tags = Array.isArray(project.tags)
+    ? project.tags
+    : [];
+
   const [progressInput, setProgressInput] =
-    useState(String(project.progress));
+    useState(String(project.progress ?? 0));
 
   function handleProgressChange(
     value: string
@@ -74,7 +87,7 @@ export default function WorkspaceCard({
 
     if (Number.isNaN(numericValue)) {
       setProgressInput(
-        String(project.progress)
+        String(project.progress ?? 0)
       );
 
       return;
@@ -97,6 +110,46 @@ export default function WorkspaceCard({
         project.id,
         normalizedProgress
       );
+    }
+  }
+
+  const deadlineState =
+    getWorkspaceDeadlineState(
+      project.dueDate ?? null
+    );
+
+  const deadlineLabel =
+    getWorkspaceDeadlineLabel(
+      project.dueDate ?? null
+    );
+
+  const formattedDueDate =
+    project.dueDate
+      ? new Date(
+          `${project.dueDate}T00:00:00`
+        ).toLocaleDateString("pt-BR")
+      : null;
+
+  const formattedCreatedAt =
+    project.createdAt
+      ? new Date(
+          `${project.createdAt}T00:00:00`
+        ).toLocaleDateString("pt-BR")
+      : "Data não disponível";
+
+  function getDeadlineColor() {
+    switch (deadlineState) {
+      case "atrasado":
+        return "#ef4444";
+
+      case "proximo":
+        return "#f59e0b";
+
+      case "em-dia":
+        return "#22c55e";
+
+      default:
+        return "#94a3b8";
     }
   }
 
@@ -182,6 +235,66 @@ export default function WorkspaceCard({
       <div
         style={{
           display: "flex",
+          flexDirection: "column",
+          gap: 6,
+          marginTop: 12,
+        }}
+      >
+        <MetaText>
+          Responsável: {project.owner}
+        </MetaText>
+
+        <MetaText>
+          Criado em: {formattedCreatedAt}
+        </MetaText>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
+          <MetaText>
+            Prazo:{" "}
+            {formattedDueDate
+              ? formattedDueDate
+              : "Sem prazo"}
+          </MetaText>
+
+          <Badge
+            color={getDeadlineColor()}
+          >
+            {deadlineLabel}
+          </Badge>
+        </div>
+      </div>
+
+      {tags.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            marginTop: 10,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          {tags.map((tag) => (
+            <Badge
+              key={`${project.id}-${tag}`}
+              color={project.color ?? "#3b82f6"}
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      <div
+        style={{
+          display: "flex",
           gap: 12,
           marginTop: 12,
           alignItems: "center",
@@ -228,12 +341,12 @@ export default function WorkspaceCard({
       </div>
 
       <ProgressBar
-        value={project.progress}
+        value={project.progress ?? 0}
       />
 
       <MetaText>
-        Progresso: {project.progress}% • Atualizado:{" "}
-        {project.updatedAt}
+        Progresso: {project.progress ?? 0}% •
+        Atualizado: {project.updatedAt}
       </MetaText>
 
       <div

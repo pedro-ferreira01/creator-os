@@ -35,17 +35,21 @@ type WorkspaceSectionProps = {
 
   editingProjectId: string | null;
 
-  projectName: string;
-  projectDescription: string;
+ projectName: string;
+projectDescription: string;
+projectDueDate: string;
 
-  editingName: string;
-  editingDescription: string;
+editingName: string;
+editingDescription: string;
+editingDueDate: string;
 
   setProjectName: (value: string) => void;
-  setProjectDescription: (value: string) => void;
+setProjectDescription: (value: string) => void;
+setProjectDueDate: (value: string) => void;
 
-  setEditingName: (value: string) => void;
-  setEditingDescription: (value: string) => void;
+setEditingName: (value: string) => void;
+setEditingDescription: (value: string) => void;
+setEditingDueDate: (value: string) => void;
 
   handleCreateProject: () => void;
 
@@ -109,16 +113,20 @@ const WorkspaceSection = forwardRef<
     editingProjectId,
 
     projectName,
-    projectDescription,
+projectDescription,
+projectDueDate,
 
-    editingName,
-    editingDescription,
+editingName,
+editingDescription,
+editingDueDate,
 
     setProjectName,
-    setProjectDescription,
+setProjectDescription,
+setProjectDueDate,
 
-    setEditingName,
-    setEditingDescription,
+setEditingName,
+setEditingDescription,
+setEditingDueDate,
 
     handleCreateProject,
 
@@ -238,24 +246,36 @@ const WorkspaceSection = forwardRef<
           projectDescription={
             projectDescription
           }
+          projectDueDate={
+  projectDueDate
+}
           editingName={
             editingName
           }
           editingDescription={
             editingDescription
           }
+          editingDueDate={
+  editingDueDate
+}
           setProjectName={
             setProjectName
           }
           setProjectDescription={
             setProjectDescription
           }
+          setProjectDueDate={
+  setProjectDueDate
+}
           setEditingName={
             setEditingName
           }
           setEditingDescription={
             setEditingDescription
           }
+          setEditingDueDate={
+  setEditingDueDate
+}
           handleCreateProject={
             handleCreateProject
           }
