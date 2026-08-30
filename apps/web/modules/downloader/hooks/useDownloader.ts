@@ -1,5 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
+import { downloaderApi } from "../api/downloader.api";
 import { downloaderService } from "../services/downloader.service";
 
 import type {
@@ -8,30 +13,66 @@ import type {
 } from "../types";
 
 export function useDownloader() {
- const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+  const [downloads, setDownloads] =
+    useState<DownloadItem[]>([]);
+
+  const [loaded, setLoaded] =
+    useState(false);
 
   const intervals = useRef<
-    Record<string, ReturnType<typeof setInterval>>
+    Record<
+      string,
+      ReturnType<typeof setInterval>
+    >
   >({});
 
-  const [loaded, setLoaded] = useState(false);
+  // ==========================
+  // Carregar downloads
+  // ==========================
 
-useEffect(() => {
-  if (!loaded) return;
+  useEffect(() => {
+    const storedDownloads =
+      downloaderService.getDownloads();
 
-  downloaderService.saveDownloads(downloads);
-}, [downloads, loaded]);
+    setDownloads(storedDownloads);
+    setLoaded(true);
+  }, []);
 
-useEffect(() => {
-  const storedDownloads = downloaderService.getDownloads();
+  // ==========================
+  // Persistir downloads
+  // ==========================
 
-  setDownloads(storedDownloads);
+  useEffect(() => {
+    if (!loaded) return;
 
-  setLoaded(true);
-}, []);
+    downloaderService.saveDownloads(
+      downloads
+    );
+  }, [downloads, loaded]);
 
+  // ==========================
+  // Limpar intervalos
+  // ==========================
 
-  function updateDownload(updated: DownloadItem) {
+  useEffect(() => {
+    return () => {
+      Object.values(
+        intervals.current
+      ).forEach((interval) => {
+        clearInterval(interval);
+      });
+
+      intervals.current = {};
+    };
+  }, []);
+
+  // ==========================
+  // Atualizar download
+  // ==========================
+
+  function updateDownload(
+    updated: DownloadItem
+  ) {
     setDownloads((current) =>
       current.map((download) =>
         download.id === updated.id
@@ -41,112 +82,218 @@ useEffect(() => {
     );
   }
 
-  function createDownload(input: CreateDownloadInput) {
-    const newDownload =
-      downloaderService.createDownload(input);
+  // ==========================
+  // Iniciar download
+  // ==========================
 
-    setDownloads((current) => [
-      newDownload,
-      ...current,
-    ]);
+  function startDownload(
+    download: DownloadItem
+  ) {
+    if (intervals.current[download.id]) {
+      return;
+    }
 
-    startDownload(newDownload);
-  }
+    let progress = download.progress;
 
-function startDownload(download: DownloadItem) {
-  let progress = download.progress;
+    updateDownload({
+      ...download,
+      status: "Baixando",
+      updatedAt: new Date().toISOString(),
+    });
 
-  const interval = setInterval(() => {
-    progress += Math.floor(Math.random() * 15) + 5;
+    const interval = setInterval(() => {
+      progress +=
+        Math.floor(
+          Math.random() * 15
+        ) + 5;
 
-    if (progress >= 100) {
-      progress = 100;
+      if (progress >= 100) {
+        progress = 100;
+
+        updateDownload({
+          ...download,
+          progress,
+          status: "Concluído",
+          updatedAt:
+            new Date().toISOString(),
+        });
+
+        clearInterval(
+          intervals.current[
+            download.id
+          ]
+        );
+
+        delete intervals.current[
+          download.id
+        ];
+
+        return;
+      }
 
       updateDownload({
         ...download,
         progress,
-        status: "Concluído",
+        status: "Baixando",
+        updatedAt:
+          new Date().toISOString(),
       });
+    }, 1000);
 
-      clearInterval(intervals.current[download.id]);
-      delete intervals.current[download.id];
+    intervals.current[
+      download.id
+    ] = interval;
+  }
 
-      return;
+  // ==========================
+  // Criar download
+  // ==========================
+
+  async function createDownload(
+    input: CreateDownloadInput
+  ) {
+    try {
+      const newDownload =
+        await downloaderApi.createDownload(
+          input
+        );
+
+      setDownloads((current) => [
+        newDownload,
+        ...current,
+      ]);
+
+      startDownload(newDownload);
+    } catch (error) {
+      console.error(
+        "Erro ao criar download:",
+        error
+      );
     }
+  }
 
-    updateDownload({
-      ...download,
-      progress,
-      status: "Baixando",
-    });
-  }, 1000);
+  // ==========================
+  // Excluir download
+  // ==========================
 
-  intervals.current[download.id] = interval;
-}
+  function deleteDownload(
+    id: string
+  ) {
+    const interval =
+      intervals.current[id];
 
+    if (interval) {
+      clearInterval(interval);
 
-  function deleteDownload(id: string) {
-    if (intervals.current[id]) {
-      clearInterval(intervals.current[id]);
       delete intervals.current[id];
     }
 
     setDownloads((current) =>
       current.filter(
-        (download) => download.id !== id
+        (download) =>
+          download.id !== id
       )
     );
   }
 
-  function handlePrimaryAction(id: string) {
-  const download = downloads.find(
-    (item) => item.id === id
-  );
+  // ==========================
+  // Ação principal
+  // ==========================
 
-  if (!download) return;
+  function handlePrimaryAction(
+    id: string
+  ) {
+    const download =
+      downloads.find(
+        (item) =>
+          item.id === id
+      );
 
-  switch (download.status) {
-    case "Baixando":
-      if (intervals.current[id]) {
-        clearInterval(intervals.current[id]);
-        delete intervals.current[id];
+    if (!download) return;
+
+    switch (download.status) {
+      // --------------------------
+      // Baixando → Cancelar
+      // --------------------------
+
+      case "Baixando": {
+        const interval =
+          intervals.current[id];
+
+        if (interval) {
+          clearInterval(interval);
+
+          delete intervals.current[
+            id
+          ];
+        }
+
+        updateDownload({
+          ...download,
+          status: "Pendente",
+          progress: 0,
+          updatedAt:
+            new Date().toISOString(),
+        });
+
+        break;
       }
 
-      updateDownload({
-        ...download,
-        status: "Pendente",
-        progress: 0,
-      });
+      // --------------------------
+      // Pendente → Iniciar
+      // --------------------------
 
-      break;
+      case "Pendente": {
+        startDownload(download);
 
-    case "Concluído":
-      console.log("Abrir download:", id);
-      break;
+        break;
+      }
 
-    case "Erro":
-      console.log("Tentar novamente:", id);
-      break;
+      // --------------------------
+      // Concluído → Abrir
+      // --------------------------
 
-    case "Pendente":
-  startDownload(download);
+      case "Concluído": {
+        console.log(
+          "Abrir download:",
+          id
+        );
 
-  updateDownload({
-    ...download,
-    status: "Baixando",
-  });
+        break;
+      }
 
-  break;
+      // --------------------------
+      // Erro → Tentar novamente
+      // --------------------------
+
+      case "Erro": {
+        const retryDownload = {
+          ...download,
+          status: "Pendente" as const,
+          progress: 0,
+          errorMessage: null,
+          updatedAt:
+            new Date().toISOString(),
+        };
+
+        updateDownload(
+          retryDownload
+        );
+
+        startDownload(
+          retryDownload
+        );
+
+        break;
+      }
+    }
   }
-}
 
-
- return {
-  downloads,
-  createDownload,
-  updateDownload,
-  deleteDownload,
-  handlePrimaryAction,
-};
+  return {
+    downloads,
+    createDownload,
+    updateDownload,
+    deleteDownload,
+    handlePrimaryAction,
+  };
 }
- 

@@ -1,33 +1,37 @@
 import { downloadItems } from "../data/downloader.mock";
+
 import type {
   CreateDownloadInput,
   DownloadItem,
 } from "../types";
 
-const STORAGE_KEY = "creatoros.downloads";
+const STORAGE_KEY =
+  "creatoros.downloads";
 
-export const downloaderService = {
-  getDownloads(): DownloadItem[] {
+function loadDownloads(): DownloadItem[] {
   if (typeof window === "undefined") {
     return downloadItems;
   }
 
-  
-
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored =
+    localStorage.getItem(STORAGE_KEY);
 
   if (!stored) {
     return downloadItems;
   }
 
   try {
-    return JSON.parse(stored) as DownloadItem[];
+    return JSON.parse(
+      stored
+    ) as DownloadItem[];
   } catch {
     return downloadItems;
   }
-},
+}
 
-saveDownloads(downloads: DownloadItem[]) {
+function saveDownloads(
+  downloads: DownloadItem[]
+) {
   if (typeof window === "undefined") {
     return;
   }
@@ -36,25 +40,143 @@ saveDownloads(downloads: DownloadItem[]) {
     STORAGE_KEY,
     JSON.stringify(downloads)
   );
-},
+}
 
-  getDownloadById(id: string): DownloadItem | undefined {
-    return downloadItems.find((item) => item.id === id);
+export const downloaderService = {
+  // ==========================
+  // Listar downloads
+  // ==========================
+
+  getDownloads(): DownloadItem[] {
+    return loadDownloads();
   },
 
-  createDownload(input: CreateDownloadInput): DownloadItem {
-  return {
-    id: crypto.randomUUID(),
+  // ==========================
+  // Salvar downloads
+  // ==========================
 
-    url: input.url,
+  saveDownloads(
+    downloads: DownloadItem[]
+  ) {
+    saveDownloads(downloads);
+  },
 
-    platform: input.platform,
+  // ==========================
+  // Buscar por ID
+  // ==========================
 
-    status: "Pendente",
+  getDownloadById(
+    id: string
+  ): DownloadItem | undefined {
+    return loadDownloads().find(
+      (download) =>
+        download.id === id
+    );
+  },
 
-    progress: 0,
+  // ==========================
+  // Criar download
+  // ==========================
 
-    createdAt: "Agora",
-  };
-}
+  createDownload(
+    input: CreateDownloadInput
+  ): DownloadItem {
+    return {
+      id: crypto.randomUUID(),
+
+      url: input.url,
+
+      platform: input.platform,
+
+      status: "Pendente",
+
+      progress: 0,
+
+      title: null,
+
+      thumbnailUrl: null,
+
+      fileName: null,
+
+      fileUrl: null,
+
+      errorMessage: null,
+
+      createdAt: "Agora",
+
+      updatedAt: null,
+    };
+  },
+
+  // ==========================
+  // Atualizar download
+  // ==========================
+
+  updateDownload(
+  id: string,
+  updates: Partial<DownloadItem>
+): DownloadItem | undefined {
+  const downloads =
+    loadDownloads();
+
+  const index =
+    downloads.findIndex(
+      (download) =>
+        download.id === id
+    );
+
+  if (index === -1) {
+    return undefined;
   }
+
+  const currentDownload =
+    downloads[index];
+
+  if (!currentDownload) {
+    return undefined;
+  }
+
+  const updatedDownload: DownloadItem = {
+    ...currentDownload,
+    ...updates,
+    id,
+  };
+
+  downloads[index] =
+    updatedDownload;
+
+  saveDownloads(downloads);
+
+  return updatedDownload;
+},
+
+  // ==========================
+  // Excluir download
+  // ==========================
+
+  deleteDownload(
+    id: string
+  ): boolean {
+    const downloads =
+      loadDownloads();
+
+    const filteredDownloads =
+      downloads.filter(
+        (download) =>
+          download.id !== id
+      );
+
+    if (
+      filteredDownloads.length ===
+      downloads.length
+    ) {
+      return false;
+    }
+
+    saveDownloads(
+      filteredDownloads
+    );
+
+    return true;
+  },
+};

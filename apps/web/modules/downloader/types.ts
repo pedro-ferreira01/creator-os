@@ -21,7 +21,19 @@ export interface DownloadItem {
 
   progress: number;
 
+  title: string | null;
+
+  thumbnailUrl: string | null;
+
+  fileName: string | null;
+
+  fileUrl: string | null;
+
+  errorMessage: string | null;
+
   createdAt: string;
+
+  updatedAt: string | null;
 }
 
 export interface CreateDownloadInput {
