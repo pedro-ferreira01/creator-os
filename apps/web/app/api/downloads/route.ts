@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 
 import { downloaderService } from "@/modules/downloader/services/downloader.service";
 
+import {
+  processDownload,
+} from "@/modules/downloader/services/downloader.processor";
+
 import type {
   CreateDownloadInput,
   DownloadPlatform,
+  DownloadItem,
 } from "@/modules/downloader/types";
 
 const VALID_PLATFORMS: DownloadPlatform[] = [
@@ -19,6 +24,10 @@ export async function POST(request: Request) {
     const body =
       (await request.json()) as Partial<CreateDownloadInput>;
 
+    // ==========================
+    // Validar URL
+    // ==========================
+
     if (
       typeof body.url !== "string" ||
       !body.url.trim()
@@ -31,6 +40,10 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // ==========================
+    // Validar plataforma
+    // ==========================
 
     if (
       typeof body.platform !== "string" ||
@@ -47,6 +60,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // ==========================
+    // Criar entrada
+    // ==========================
+
     const input: CreateDownloadInput = {
       url: body.url.trim(),
       platform:
@@ -56,12 +73,72 @@ export async function POST(request: Request) {
     const download =
       downloaderService.createDownload(input);
 
-    return NextResponse.json(
-      {
-        data: download,
-      },
-      { status: 201 }
-    );
+    // ==========================
+    // Processar
+    // ==========================
+
+    try {
+      const result =
+        await processDownload(download);
+
+      const processedDownload: DownloadItem = {
+        ...download,
+
+        title: result.title,
+
+        thumbnailUrl:
+          result.thumbnailUrl,
+
+        fileName:
+          result.fileName,
+
+        fileUrl:
+          result.fileUrl,
+
+        status: "Concluído",
+
+        progress: 100,
+
+        errorMessage: null,
+
+        updatedAt:
+          new Date().toISOString(),
+      };
+
+      return NextResponse.json(
+        {
+          data: processedDownload,
+        },
+        { status: 201 }
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível processar o download.";
+
+      const failedDownload: DownloadItem = {
+        ...download,
+
+        status: "Erro",
+
+        progress: 0,
+
+        errorMessage,
+
+        updatedAt:
+          new Date().toISOString(),
+      };
+
+      return NextResponse.json(
+        {
+          data: failedDownload,
+
+          error: errorMessage,
+        },
+        { status: 422 }
+      );
+    }
   } catch {
     return NextResponse.json(
       {

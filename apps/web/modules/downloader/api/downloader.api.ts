@@ -11,19 +11,41 @@ type ApiResponse<T> = {
 async function parseResponse<T>(
   response: Response
 ): Promise<T> {
-  const body =
-    (await response.json()) as ApiResponse<T>;
+  const text = await response.text();
 
-  if (!response.ok) {
-    throw new Error(
-      body.error ??
-        "Erro ao comunicar com a API."
-    );
+  let body: ApiResponse<T> = {};
+
+  if (text.trim()) {
+    try {
+      body = JSON.parse(
+        text
+      ) as ApiResponse<T>;
+    } catch {
+      throw new Error(
+        `A API retornou uma resposta inválida (HTTP ${response.status}).`
+      );
+    }
   }
 
-  if (body.data === undefined) {
+  if (!response.ok) {
+    const message =
+      typeof body.error === "string" &&
+      body.error.trim()
+        ? body.error
+        : `Erro ao comunicar com a API (HTTP ${response.status}).`;
+
+    throw new Error(message);
+  }
+
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      body,
+      "data"
+    ) ||
+    body.data === undefined
+  ) {
     throw new Error(
-      "A API retornou uma resposta inválida."
+      "A API retornou uma resposta sem dados."
     );
   }
 
