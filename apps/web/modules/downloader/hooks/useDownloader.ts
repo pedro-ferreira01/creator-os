@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -19,17 +18,6 @@ export function useDownloader() {
   const [loaded, setLoaded] =
     useState(false);
 
-  const intervals = useRef<
-    Record<
-      string,
-      ReturnType<typeof setInterval>
-    >
-  >({});
-
-  // ==========================
-  // Carregar downloads
-  // ==========================
-
   useEffect(() => {
     const storedDownloads =
       downloaderService.getDownloads();
@@ -38,10 +26,6 @@ export function useDownloader() {
     setLoaded(true);
   }, []);
 
-  // ==========================
-  // Persistir downloads
-  // ==========================
-
   useEffect(() => {
     if (!loaded) return;
 
@@ -49,26 +33,6 @@ export function useDownloader() {
       downloads
     );
   }, [downloads, loaded]);
-
-  // ==========================
-  // Limpar intervalos
-  // ==========================
-
-  useEffect(() => {
-    return () => {
-      Object.values(
-        intervals.current
-      ).forEach((interval) => {
-        clearInterval(interval);
-      });
-
-      intervals.current = {};
-    };
-  }, []);
-
-  // ==========================
-  // Atualizar download
-  // ==========================
 
   function updateDownload(
     updated: DownloadItem
@@ -81,73 +45,6 @@ export function useDownloader() {
       )
     );
   }
-
-  // ==========================
-  // Iniciar download
-  // ==========================
-
-  function startDownload(
-    download: DownloadItem
-  ) {
-    if (intervals.current[download.id]) {
-      return;
-    }
-
-    let progress = download.progress;
-
-    updateDownload({
-      ...download,
-      status: "Baixando",
-      updatedAt: new Date().toISOString(),
-    });
-
-    const interval = setInterval(() => {
-      progress +=
-        Math.floor(
-          Math.random() * 15
-        ) + 5;
-
-      if (progress >= 100) {
-        progress = 100;
-
-        updateDownload({
-          ...download,
-          progress,
-          status: "Concluído",
-          updatedAt:
-            new Date().toISOString(),
-        });
-
-        clearInterval(
-          intervals.current[
-            download.id
-          ]
-        );
-
-        delete intervals.current[
-          download.id
-        ];
-
-        return;
-      }
-
-      updateDownload({
-        ...download,
-        progress,
-        status: "Baixando",
-        updatedAt:
-          new Date().toISOString(),
-      });
-    }, 1000);
-
-    intervals.current[
-      download.id
-    ] = interval;
-  }
-
-  // ==========================
-  // Criar download
-  // ==========================
 
   async function createDownload(
     input: CreateDownloadInput
@@ -162,8 +59,6 @@ export function useDownloader() {
         newDownload,
         ...current,
       ]);
-
-      startDownload(newDownload);
     } catch (error) {
       console.error(
         "Erro ao criar download:",
@@ -172,22 +67,9 @@ export function useDownloader() {
     }
   }
 
-  // ==========================
-  // Excluir download
-  // ==========================
-
   function deleteDownload(
     id: string
   ) {
-    const interval =
-      intervals.current[id];
-
-    if (interval) {
-      clearInterval(interval);
-
-      delete intervals.current[id];
-    }
-
     setDownloads((current) =>
       current.filter(
         (download) =>
@@ -196,9 +78,32 @@ export function useDownloader() {
     );
   }
 
-  // ==========================
-  // Ação principal
-  // ==========================
+  function downloadFile(
+    download: DownloadItem
+  ) {
+    if (!download.fileUrl) {
+      console.error(
+        "Download concluído sem URL de arquivo:",
+        download.id
+      );
+
+      return;
+    }
+
+    const params =
+      new URLSearchParams({
+        url: download.fileUrl,
+        filename:
+          download.fileName ??
+          `creatoros-${download.id}.mp4`,
+      });
+
+    window.open(
+      `/api/downloads/file?${params.toString()}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
 
   function handlePrimaryAction(
     id: string
@@ -212,79 +117,31 @@ export function useDownloader() {
     if (!download) return;
 
     switch (download.status) {
-      // --------------------------
-      // Baixando → Cancelar
-      // --------------------------
-
       case "Baixando": {
-        const interval =
-          intervals.current[id];
-
-        if (interval) {
-          clearInterval(interval);
-
-          delete intervals.current[
-            id
-          ];
-        }
-
-        updateDownload({
-          ...download,
-          status: "Pendente",
-          progress: 0,
-          updatedAt:
-            new Date().toISOString(),
-        });
-
-        break;
+        return;
       }
-
-      // --------------------------
-      // Pendente → Iniciar
-      // --------------------------
 
       case "Pendente": {
-        startDownload(download);
-
-        break;
-      }
-
-      // --------------------------
-      // Concluído → Abrir
-      // --------------------------
-
-      case "Concluído": {
-        console.log(
-          "Abrir download:",
+        console.warn(
+          "Processamento de downloads pendentes ainda não está disponível.",
           id
         );
 
+        return;
+      }
+
+      case "Concluído": {
+        downloadFile(download);
         break;
       }
 
-      // --------------------------
-      // Erro → Tentar novamente
-      // --------------------------
-
       case "Erro": {
-        const retryDownload = {
-          ...download,
-          status: "Pendente" as const,
-          progress: 0,
-          errorMessage: null,
-          updatedAt:
-            new Date().toISOString(),
-        };
-
-        updateDownload(
-          retryDownload
+        console.warn(
+          "Retry de downloads com erro ainda será implementado.",
+          id
         );
 
-        startDownload(
-          retryDownload
-        );
-
-        break;
+        return;
       }
     }
   }

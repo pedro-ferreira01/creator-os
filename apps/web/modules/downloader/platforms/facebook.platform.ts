@@ -1,92 +1,62 @@
-import type { DownloadItem } from "../types";
+import type {
+  DownloadItem,
+} from "../types";
+
+import type {
+  DownloadProcessorResult,
+} from "../services/downloader.result";
 
 import type {
   DownloaderPlatform,
 } from "./downloader.platform";
 
-import type {
-  DownloadProcessorResult,
-} from "../services/downloader.processor";
+import {
+  ExternalDownloaderProvider,
+} from "../services/external-downloader.provider";
+
+const provider =
+  new ExternalDownloaderProvider();
 
 function isFacebookUrl(
   url: string
 ): boolean {
   try {
-    const parsedUrl = new URL(url);
+    const parsedUrl =
+      new URL(url);
 
     const hostname =
-      parsedUrl.hostname.toLowerCase();
+      parsedUrl.hostname
+        .toLowerCase()
+        .replace(/^www\./, "");
 
     return (
       hostname === "facebook.com" ||
-      hostname === "www.facebook.com" ||
-      hostname === "m.facebook.com" ||
-      hostname === "fb.watch"
+      hostname === "fb.com" ||
+      hostname === "fb.watch" ||
+      hostname.endsWith(
+        ".facebook.com"
+      )
     );
   } catch {
     return false;
   }
 }
 
-async function processFacebookDownload(
-  download: DownloadItem
-): Promise<DownloadProcessorResult> {
-  const response = await fetch(
-    `https://www.facebook.com/plugins/video/oembed.json/?url=${encodeURIComponent(
-      download.url
-    )}`
-  );
+export const facebookPlatform: DownloaderPlatform =
+  {
+    platform: "Facebook",
 
-  if (!response.ok) {
-    throw new Error(
-      "Não foi possível obter os dados do conteúdo do Facebook."
-    );
-  }
+    canHandle(
+      url: string
+    ): boolean {
+      return isFacebookUrl(url);
+    },
 
-  const data = (await response.json()) as {
-    title?: string;
-    author_name?: string;
-    thumbnail_url?: string;
+    async process(
+      download: DownloadItem
+    ): Promise<DownloadProcessorResult> {
+      return provider.process(
+        download
+      );
+    },
   };
-
-  const title =
-    typeof data.title === "string"
-      ? data.title
-      : null;
-
-  const thumbnailUrl =
-    typeof data.thumbnail_url === "string"
-      ? data.thumbnail_url
-      : null;
-
-  const safeTitle =
-    title
-      ?.replace(/[<>:"/\\|?*]/g, "")
-      .trim() ||
-    `facebook-${Date.now()}`;
-
-  return {
-    title,
-    thumbnailUrl,
-    fileName: `${safeTitle}.mp4`,
-    fileUrl: null,
-  };
-}
-
-export const facebookPlatform: DownloaderPlatform = {
-  platform: "Facebook",
-
-  canHandle(
-    url: string
-  ): boolean {
-    return isFacebookUrl(url);
-  },
-
-  async process(
-    download: DownloadItem
-  ): Promise<DownloadProcessorResult> {
-    return processFacebookDownload(
-      download
-    );
-  },
-};

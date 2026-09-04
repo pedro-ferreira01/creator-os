@@ -5,7 +5,7 @@ import type {
 
 import type {
   DownloadProcessorResult,
-} from "../services/downloader.processor";
+} from "../services/downloader.result";
 
 export interface DownloaderPlatform {
   platform: DownloadPlatform;

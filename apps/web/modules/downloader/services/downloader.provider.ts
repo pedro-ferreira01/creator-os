@@ -2,7 +2,7 @@ import type { DownloadItem } from "../types";
 
 import type {
   DownloadProcessorResult,
-} from "./downloader.processor";
+} from "./downloader.result";
 
 export interface DownloaderProvider {
   process(

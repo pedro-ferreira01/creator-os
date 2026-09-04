@@ -20,6 +20,12 @@ export const downloadStatusConfig: Record<
     canDelete: true,
   },
 
+  Processando: {
+    color: "#8b5cf6",
+    action: "Processando",
+    canDelete: true,
+  },
+
   Concluído: {
     color: "#22c55e",
     action: "Abrir",
