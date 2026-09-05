@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import Logo from "./Logo";
+import LogoutButton from "@/components/auth/LogoutButton";
 import { navigation } from "@/lib/navigation";
 
 export default function Sidebar() {
@@ -30,6 +31,10 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="mt-auto">
+        <LogoutButton />
+      </div>
     </aside>
   );
 }
