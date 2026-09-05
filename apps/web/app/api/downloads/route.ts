@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { downloaderService } from "@/modules/downloader/services/downloader.service";
+import {
+  createSupabaseServerClient,
+} from "@/lib/supabase/server";
+
+import { downloaderRepository } from "@/modules/downloader/services/downloader.repository";
 
 import {
   processDownload,
@@ -9,7 +13,6 @@ import {
 import type {
   CreateDownloadInput,
   DownloadPlatform,
-  DownloadItem,
 } from "@/modules/downloader/types";
 
 const VALID_PLATFORMS: DownloadPlatform[] = [
@@ -21,6 +24,32 @@ const VALID_PLATFORMS: DownloadPlatform[] = [
 
 export async function POST(request: Request) {
   try {
+    // ==========================
+    // Autenticação
+    // ==========================
+
+    const supabase =
+      await createSupabaseServerClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        {
+          error:
+            "Usuário não autenticado.",
+        },
+        { status: 401 }
+      );
+    }
+
+    // ==========================
+    // Ler body
+    // ==========================
+
     const body =
       (await request.json()) as Partial<CreateDownloadInput>;
 
@@ -60,54 +89,67 @@ export async function POST(request: Request) {
       );
     }
 
-    // ==========================
-    // Criar entrada
-    // ==========================
-
     const input: CreateDownloadInput = {
       url: body.url.trim(),
       platform:
         body.platform as DownloadPlatform,
     };
 
+    // ==========================
+    // Criar no Supabase
+    // ==========================
+
     const download =
-      downloaderService.createDownload(input);
+      await downloaderRepository.create(
+        supabase,
+        {
+          userId: user.id,
+          url: input.url,
+          platform: input.platform,
+        }
+      );
 
     // ==========================
-    // Processar
+    // Processar download
     // ==========================
 
     try {
+      await downloaderRepository.update(
+        supabase,
+        download.id,
+        {
+          status: "Processando",
+          progress: 0,
+        }
+      );
+
       const result =
         await processDownload(download);
 
-      const processedDownload: DownloadItem = {
-        ...download,
+      // ==========================
+      // Salvar resultado
+      // ==========================
 
-        title: result.title,
-
-        thumbnailUrl:
-          result.thumbnailUrl,
-
-        fileName:
-          result.fileName,
-
-        fileUrl:
-          result.fileUrl,
-
-        status: "Concluído",
-
-        progress: 100,
-
-        errorMessage: null,
-
-        updatedAt:
-          new Date().toISOString(),
-      };
+      const completedDownload =
+        await downloaderRepository.update(
+          supabase,
+          download.id,
+          {
+            title: result.title,
+            thumbnail_url:
+              result.thumbnailUrl,
+            file_name:
+              result.fileName,
+            file_url:
+              result.fileUrl,
+            status: "Concluído",
+            progress: 100,
+          }
+        );
 
       return NextResponse.json(
         {
-          data: processedDownload,
+          data: completedDownload,
         },
         { status: 201 }
       );
@@ -117,33 +159,33 @@ export async function POST(request: Request) {
           ? error.message
           : "Não foi possível processar o download.";
 
-      const failedDownload: DownloadItem = {
-        ...download,
-
-        status: "Erro",
-
-        progress: 0,
-
-        errorMessage,
-
-        updatedAt:
-          new Date().toISOString(),
-      };
+      const failedDownload =
+        await downloaderRepository.update(
+          supabase,
+          download.id,
+          {
+            status: "Erro",
+            progress: 0,
+          }
+        );
 
       return NextResponse.json(
         {
           data: failedDownload,
-
           error: errorMessage,
         },
         { status: 422 }
       );
     }
-  } catch {
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Não foi possível criar o download.";
+
     return NextResponse.json(
       {
-        error:
-          "Não foi possível criar o download.",
+        error: errorMessage,
       },
       { status: 500 }
     );
