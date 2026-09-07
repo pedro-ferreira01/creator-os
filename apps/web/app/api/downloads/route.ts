@@ -22,6 +22,61 @@ const VALID_PLATFORMS: DownloadPlatform[] = [
   "Facebook",
 ];
 
+export async function GET() {
+  try {
+    // ==========================
+    // Autenticação
+    // ==========================
+
+    const supabase =
+      await createSupabaseServerClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        {
+          error:
+            "Usuário não autenticado.",
+        },
+        { status: 401 }
+      );
+    }
+
+    // ==========================
+    // Buscar downloads do usuário
+    // ==========================
+
+    const downloads =
+      await downloaderRepository.findAllByUser(
+        supabase,
+        user.id
+      );
+
+    return NextResponse.json(
+      {
+        data: downloads,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Não foi possível carregar os downloads.";
+
+    return NextResponse.json(
+      {
+        error: errorMessage,
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     // ==========================

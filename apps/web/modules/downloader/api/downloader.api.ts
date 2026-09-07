@@ -53,6 +53,21 @@ async function parseResponse<T>(
 }
 
 export const downloaderApi = {
+  async getDownloads(): Promise<
+    DownloadItem[]
+  > {
+    const response = await fetch(
+      "/api/downloads",
+      {
+        method: "GET",
+      }
+    );
+
+    return parseResponse<
+      DownloadItem[]
+    >(response);
+  },
+
   async createDownload(
     input: CreateDownloadInput
   ): Promise<DownloadItem> {

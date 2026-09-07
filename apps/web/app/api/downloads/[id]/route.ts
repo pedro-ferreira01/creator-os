@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
-import {
-  downloaderService,
-} from "@/modules/downloader";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { downloaderRepository } from "@/modules/downloader/services/downloader.repository";
 
 type RouteContext = {
   params: Promise<{
@@ -17,14 +16,30 @@ export async function GET(
   try {
     const { id } = await context.params;
 
-    const download =
-      downloaderService.getDownloadById(id);
+    const supabase = await createSupabaseServerClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: "Não autenticado.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const download = await downloaderRepository.findById(
+      supabase,
+      id
+    );
 
     if (!download) {
       return NextResponse.json(
         {
-          error:
-            "Download não encontrado.",
+          error: "Download não encontrado.",
         },
         { status: 404 }
       );
@@ -36,8 +51,7 @@ export async function GET(
   } catch {
     return NextResponse.json(
       {
-        error:
-          "Não foi possível consultar o download.",
+        error: "Não foi possível consultar o download.",
       },
       { status: 500 }
     );
@@ -51,14 +65,39 @@ export async function DELETE(
   try {
     const { id } = await context.params;
 
-    const download =
-      downloaderService.getDownloadById(id);
+    const supabase = await createSupabaseServerClient();
 
-    if (!download) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
       return NextResponse.json(
         {
-          error:
-            "Download não encontrado.",
+          error: "Não autenticado.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("downloads")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(
+        `Não foi possível excluir o download: ${error.message}`
+      );
+    }
+
+    if (!data) {
+      return NextResponse.json(
+        {
+          error: "Download não encontrado.",
         },
         { status: 404 }
       );
@@ -67,11 +106,15 @@ export async function DELETE(
     return NextResponse.json({
       data: null,
     });
-  } catch {
+  } catch (error) {
+    console.error(
+      "Erro ao excluir download:",
+      error
+    );
+
     return NextResponse.json(
       {
-        error:
-          "Não foi possível excluir o download.",
+        error: "Não foi possível excluir o download.",
       },
       { status: 500 }
     );

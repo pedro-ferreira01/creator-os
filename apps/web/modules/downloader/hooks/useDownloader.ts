@@ -4,7 +4,6 @@ import {
 } from "react";
 
 import { downloaderApi } from "../api/downloader.api";
-import { downloaderService } from "../services/downloader.service";
 
 import type {
   CreateDownloadInput,
@@ -18,21 +17,45 @@ export function useDownloader() {
   const [loaded, setLoaded] =
     useState(false);
 
-  useEffect(() => {
-    const storedDownloads =
-      downloaderService.getDownloads();
+  // ==========================
+  // Carregar histórico real
+  // ==========================
 
-    setDownloads(storedDownloads);
-    setLoaded(true);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDownloads() {
+      try {
+        const storedDownloads =
+          await downloaderApi.getDownloads();
+
+        if (!cancelled) {
+          setDownloads(
+            storedDownloads
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao carregar downloads:",
+          error
+        );
+      } finally {
+        if (!cancelled) {
+          setLoaded(true);
+        }
+      }
+    }
+
+    loadDownloads();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  useEffect(() => {
-    if (!loaded) return;
-
-    downloaderService.saveDownloads(
-      downloads
-    );
-  }, [downloads, loaded]);
+  // ==========================
+  // Atualizar download
+  // ==========================
 
   function updateDownload(
     updated: DownloadItem
@@ -45,6 +68,10 @@ export function useDownloader() {
       )
     );
   }
+
+  // ==========================
+  // Criar download
+  // ==========================
 
   async function createDownload(
     input: CreateDownloadInput
@@ -67,16 +94,25 @@ export function useDownloader() {
     }
   }
 
-  function deleteDownload(
-    id: string
-  ) {
+  // ==========================
+  // Remover da interface
+  // ==========================
+
+  async function deleteDownload(id: string) {
+  try {
+    await downloaderApi.deleteDownload(id);
+
     setDownloads((current) =>
-      current.filter(
-        (download) =>
-          download.id !== id
-      )
+      current.filter((download) => download.id !== id)
     );
+  } catch (error) {
+    console.error("Erro ao excluir download:", error);
   }
+}
+
+  // ==========================
+  // Baixar arquivo
+  // ==========================
 
   function downloadFile(
     download: DownloadItem
@@ -105,6 +141,10 @@ export function useDownloader() {
     );
   }
 
+  // ==========================
+  // Ação principal
+  // ==========================
+
   function handlePrimaryAction(
     id: string
   ) {
@@ -118,6 +158,10 @@ export function useDownloader() {
 
     switch (download.status) {
       case "Baixando": {
+        return;
+      }
+
+      case "Processando": {
         return;
       }
 
@@ -148,6 +192,7 @@ export function useDownloader() {
 
   return {
     downloads,
+    loaded,
     createDownload,
     updateDownload,
     deleteDownload,
