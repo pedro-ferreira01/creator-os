@@ -157,7 +157,7 @@ export default function Dashboard() {
   // Workspace Actions
   // ==========================
 
-  function handleCreateProject() {
+  async function handleCreateProject() {
     const name = editingProjectId
       ? editingName
       : projectName;
@@ -174,83 +174,97 @@ export default function Dashboard() {
       return;
     }
 
-    if (editingProjectId) {
-      const existingProject =
-        projects.find(
-          (project) =>
-            project.id === editingProjectId
+    try {
+      if (editingProjectId) {
+        const existingProject =
+          projects.find(
+            (project) =>
+              project.id === editingProjectId
+          );
+
+        if (!existingProject) {
+          return;
+        }
+
+        await updateProject({
+          ...existingProject,
+          name: name.trim(),
+          description:
+            description.trim() ||
+            "Sem descrição",
+          dueDate: dueDate || null,
+        });
+
+        handleCancelEdit();
+
+        showToast(
+          "Projeto atualizado com sucesso."
         );
 
-      if (!existingProject) {
         return;
       }
 
-      updateProject({
-        ...existingProject,
-        name,
-        description:
-          description || "Sem descrição",
-        dueDate: dueDate || null,
-        updatedAt: "Agora",
-      });
+      const newProject: WorkspaceProject = {
+        id: crypto.randomUUID(),
 
-      handleCancelEdit();
+        name: name.trim(),
+
+        description:
+          description.trim() ||
+          "Sem descrição",
+
+        category: "Workspace",
+
+        status: "Planejamento",
+
+        priority: "Média",
+
+        progress: 0,
+
+        updatedAt: new Date().toISOString(),
+
+        pinned: false,
+
+        favorite: false,
+
+        archived: false,
+
+        owner: "Sr. Finch",
+
+        createdAt: new Date()
+          .toISOString()
+          .substring(0, 10),
+
+        dueDate: dueDate || null,
+
+        color: "#3b82f6",
+
+        tags: [],
+      };
+
+      await createProject(newProject);
+
+      setProjectName("");
+      setProjectDescription("");
+      setProjectDueDate("");
+
+      setShowCreateForm(false);
 
       showToast(
-        "Projeto atualizado com sucesso."
+        "Projeto criado com sucesso."
+      );
+    } catch (error) {
+      console.error(
+        "Erro na operação do projeto:",
+        error
       );
 
-      return;
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível salvar o projeto."
+      );
     }
-
-    const newProject: WorkspaceProject = {
-      id: crypto.randomUUID(),
-
-      name,
-
-      description:
-        description || "Sem descrição",
-
-      category: "Workspace",
-
-      status: "Planejamento",
-
-      priority: "Média",
-
-      progress: 0,
-
-      updatedAt: "Agora",
-
-      pinned: false,
-
-      favorite: false,
-
-      archived: false,
-
-      owner: "Sr. Finch",
-
-      createdAt: new Date()
-        .toISOString()
-        .substring(0, 10),
-
-      dueDate: dueDate || null,
-
-      color: "#3b82f6",
-
-      tags: [],
-    };
-
-    createProject(newProject);
-
-    setProjectName("");
-    setProjectDescription("");
-    setProjectDueDate("");
-
-    setShowCreateForm(false);
-
-    showToast(
-      "Projeto criado com sucesso."
-    );
   }
 
   function handleStartEdit(
@@ -283,73 +297,154 @@ export default function Dashboard() {
     setShowCreateForm(false);
   }
 
-  function handleDeleteProject(
+  async function handleDeleteProject(
     id: string
   ) {
-    deleteProject(id);
+    try {
+      await deleteProject(id);
 
-    showToast("Projeto removido.");
+      showToast("Projeto removido.");
+    } catch (error) {
+      console.error(
+        "Erro ao remover projeto:",
+        error
+      );
+
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível remover o projeto."
+      );
+    }
   }
 
-  function handleTogglePin(
+  async function handleTogglePin(
     project: WorkspaceProject
   ) {
-    togglePin(project.id);
+    try {
+      await togglePin(project.id);
 
-    showToast(
-      project.pinned
-        ? "Projeto desafixado."
-        : "Projeto fixado."
-    );
+      showToast(
+        project.pinned
+          ? "Projeto desafixado."
+          : "Projeto fixado."
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao alterar fixação:",
+        error
+      );
+
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível alterar a fixação."
+      );
+    }
   }
 
-  function handleToggleFavorite(
+  async function handleToggleFavorite(
     project: WorkspaceProject
   ) {
-    toggleFavorite(project.id);
+    try {
+      await toggleFavorite(project.id);
 
-    showToast(
-      project.favorite
-        ? "Projeto removido dos favoritos."
-        : "Projeto favoritado."
-    );
+      showToast(
+        project.favorite
+          ? "Projeto removido dos favoritos."
+          : "Projeto favoritado."
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao alterar favorito:",
+        error
+      );
+
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível alterar o favorito."
+      );
+    }
   }
 
-  function handleToggleArchive(
+  async function handleToggleArchive(
     project: WorkspaceProject
   ) {
-    toggleArchive(project.id);
+    try {
+      await toggleArchive(project.id);
 
-    showToast(
-      project.archived
-        ? "Projeto restaurado."
-        : "Projeto arquivado."
-    );
+      showToast(
+        project.archived
+          ? "Projeto restaurado."
+          : "Projeto arquivado."
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao alterar arquivamento:",
+        error
+      );
+
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível alterar o arquivamento."
+      );
+    }
   }
 
-  function handleUpdateStatus(
+  async function handleUpdateStatus(
     id: string,
     status: WorkspaceProject["status"]
   ) {
-    updateProjectStatus(id, status);
+    try {
+      await updateProjectStatus(
+        id,
+        status
+      );
 
-    showToast(
-      "Status do projeto atualizado."
-    );
+      showToast(
+        "Status do projeto atualizado."
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao atualizar status:",
+        error
+      );
+
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível atualizar o status."
+      );
+    }
   }
 
-  function handleUpdateProgress(
+  async function handleUpdateProgress(
     id: string,
     progress: number
   ) {
-    updateProjectProgress(
-      id,
-      progress
-    );
+    try {
+      await updateProjectProgress(
+        id,
+        progress
+      );
 
-    showToast(
-      "Progresso do projeto atualizado."
-    );
+      showToast(
+        "Progresso do projeto atualizado."
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao atualizar progresso:",
+        error
+      );
+
+      showToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível atualizar o progresso."
+      );
+    }
   }
 
   // ==========================

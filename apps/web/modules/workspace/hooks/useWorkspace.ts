@@ -1,6 +1,12 @@
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
-import { workspaceService } from "../services/workspace.service";
+import {
+  workspaceService,
+} from "../services/workspace.service";
 
 import type {
   WorkspaceProject,
@@ -12,168 +18,254 @@ export function useWorkspace() {
     WorkspaceProject[]
   >([]);
 
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const loadProjects = useCallback(
+    async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const loadedProjects =
+          await workspaceService.getProjects();
+
+        setProjects(loadedProjects);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar os projetos.";
+
+        console.error(
+          "Erro ao carregar projetos:",
+          error
+        );
+
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
-    setProjects(
-      workspaceService.getProjects()
-    );
-  }, []);
+    void loadProjects();
+  }, [loadProjects]);
 
-  function deleteProject(id: string) {
-    const updatedProjects =
-      projects.filter(
-        (project) => project.id !== id
-      );
-
-    setProjects(updatedProjects);
-
-    workspaceService.saveProjects(
-      updatedProjects
-    );
-  }
-
-  function createProject(
-    project: WorkspaceProject
-  ) {
-    const updatedProjects = [
-      project,
-      ...projects,
-    ];
-
-    setProjects(updatedProjects);
-
-    workspaceService.saveProjects(
-      updatedProjects
-    );
-  }
-
-  function updateProject(
-    updatedProject: WorkspaceProject
-  ) {
-    const updatedProjects = projects.map(
-      (project) =>
-        project.id === updatedProject.id
-          ? updatedProject
-          : project
-    );
-
-    setProjects(updatedProjects);
-
-    workspaceService.saveProjects(
-      updatedProjects
-    );
-  }
-
-  function togglePin(id: string) {
-    const updatedProjects = projects.map(
-      (project) =>
-        project.id === id
-          ? {
-              ...project,
-              pinned: !project.pinned,
-            }
-          : project
-    );
-
-    setProjects(updatedProjects);
-
-    workspaceService.saveProjects(
-      updatedProjects
-    );
-  }
-
-  function toggleFavorite(
+  async function deleteProject(
     id: string
   ) {
-    const updatedProjects = projects.map(
-      (project) =>
-        project.id === id
-          ? {
-              ...project,
-              favorite:
-                !project.favorite,
-            }
-          : project
-    );
+    try {
+      setError(null);
 
-    setProjects(updatedProjects);
+      await workspaceService.deleteProject(
+        id
+      );
 
-    workspaceService.saveProjects(
-      updatedProjects
-    );
+      setProjects(
+        (currentProjects) =>
+          currentProjects.filter(
+            (project) =>
+              project.id !== id
+          )
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível excluir o projeto.";
+
+      console.error(
+        "Erro ao excluir projeto:",
+        error
+      );
+
+      setError(errorMessage);
+
+      throw error;
+    }
   }
 
-  function toggleArchive(id: string) {
-    const updatedProjects = projects.map(
-      (project) =>
-        project.id === id
-          ? {
-              ...project,
-              archived:
-                !project.archived,
-            }
-          : project
-    );
+  async function createProject(
+    project: WorkspaceProject
+  ) {
+    try {
+      setError(null);
 
-    setProjects(updatedProjects);
+      const createdProject =
+        await workspaceService.createProject(
+          project
+        );
 
-    workspaceService.saveProjects(
-      updatedProjects
-    );
+      setProjects(
+        (currentProjects) => [
+          createdProject,
+          ...currentProjects,
+        ]
+      );
+
+      return createdProject;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível criar o projeto.";
+
+      console.error(
+        "Erro ao criar projeto:",
+        error
+      );
+
+      setError(errorMessage);
+
+      throw error;
+    }
   }
 
-  function updateProjectStatus(
+  async function updateProject(
+    updatedProject: WorkspaceProject
+  ) {
+    try {
+      setError(null);
+
+      const savedProject =
+        await workspaceService.updateProject(
+          updatedProject
+        );
+
+      setProjects(
+        (currentProjects) =>
+          currentProjects.map(
+            (project) =>
+              project.id ===
+              savedProject.id
+                ? savedProject
+                : project
+          )
+      );
+
+      return savedProject;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível atualizar o projeto.";
+
+      console.error(
+        "Erro ao atualizar projeto:",
+        error
+      );
+
+      setError(errorMessage);
+
+      throw error;
+    }
+  }
+
+  async function togglePin(
+    id: string
+  ) {
+    const project =
+      projects.find(
+        (item) => item.id === id
+      );
+
+    if (!project) return;
+
+    await updateProject({
+      ...project,
+      pinned: !project.pinned,
+    });
+  }
+
+  async function toggleFavorite(
+    id: string
+  ) {
+    const project =
+      projects.find(
+        (item) => item.id === id
+      );
+
+    if (!project) return;
+
+    await updateProject({
+      ...project,
+      favorite: !project.favorite,
+    });
+  }
+
+  async function toggleArchive(
+    id: string
+  ) {
+    const project =
+      projects.find(
+        (item) => item.id === id
+      );
+
+    if (!project) return;
+
+    await updateProject({
+      ...project,
+      archived: !project.archived,
+    });
+  }
+
+  async function updateProjectStatus(
     id: string,
     status: WorkspaceStatus
   ) {
-    const updatedProjects = projects.map(
-      (project) =>
-        project.id === id
-          ? {
-              ...project,
-              status,
-              updatedAt: "Agora",
-            }
-          : project
-    );
+    const project =
+      projects.find(
+        (item) => item.id === id
+      );
 
-    setProjects(updatedProjects);
+    if (!project) return;
 
-    workspaceService.saveProjects(
-      updatedProjects
-    );
+    await updateProject({
+      ...project,
+      status,
+    });
   }
 
-  function updateProjectProgress(
+  async function updateProjectProgress(
     id: string,
     progress: number
   ) {
-    const normalizedProgress = Math.min(
-      100,
-      Math.max(0, progress)
-    );
+    const project =
+      projects.find(
+        (item) => item.id === id
+      );
 
-    const updatedProjects = projects.map(
-      (project) =>
-        project.id === id
-          ? {
-              ...project,
-              progress: normalizedProgress,
-              updatedAt: "Agora",
-            }
-          : project
-    );
+    if (!project) return;
 
-    setProjects(updatedProjects);
+    const normalizedProgress =
+      Math.min(
+        100,
+        Math.max(0, progress)
+      );
 
-    workspaceService.saveProjects(
-      updatedProjects
-    );
+    await updateProject({
+      ...project,
+      progress:
+        normalizedProgress,
+    });
   }
 
   return {
     projects,
 
     setProjects,
+
+    loading,
+
+    error,
+
+    loadProjects,
 
     createProject,
 
