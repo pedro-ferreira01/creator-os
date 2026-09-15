@@ -182,7 +182,32 @@ export async function POST(request: Request) {
         await processDownload(download);
 
       // ==========================
-      // Salvar resultado
+      // Processamento assíncrono
+      // ==========================
+
+      if (result.apifyRunId) {
+        const processingDownload =
+          await downloaderRepository.update(
+            supabase,
+            download.id,
+            {
+              status: "Processando",
+              progress: 0,
+              apify_run_id:
+                result.apifyRunId,
+            }
+          );
+
+        return NextResponse.json(
+          {
+            data: processingDownload,
+          },
+          { status: 201 }
+        );
+      }
+
+      // ==========================
+      // Processamento síncrono
       // ==========================
 
       const completedDownload =
@@ -199,6 +224,7 @@ export async function POST(request: Request) {
               result.fileUrl,
             status: "Concluído",
             progress: 100,
+            apify_run_id: null,
           }
         );
 
@@ -214,6 +240,11 @@ export async function POST(request: Request) {
           ? error.message
           : "Não foi possível processar o download.";
 
+      console.error(
+        "Erro ao processar download:",
+        error
+      );
+
       const failedDownload =
         await downloaderRepository.update(
           supabase,
@@ -221,6 +252,7 @@ export async function POST(request: Request) {
           {
             status: "Erro",
             progress: 0,
+            apify_run_id: null,
           }
         );
 

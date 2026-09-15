@@ -4,9 +4,12 @@ import type {
   DownloaderPlatform,
 } from "./downloader.platform";
 
+import { ExternalDownloaderProvider } from "../services/external-downloader.provider";
+
 function isYouTubeUrl(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
+
     const hostname =
       parsedUrl.hostname.toLowerCase();
 
@@ -22,6 +25,9 @@ function isYouTubeUrl(url: string): boolean {
   }
 }
 
+const externalDownloaderProvider =
+  new ExternalDownloaderProvider();
+
 export const youtubePlatform: DownloaderPlatform = {
   platform: "YouTube",
 
@@ -32,8 +38,8 @@ export const youtubePlatform: DownloaderPlatform = {
   async process(
     download: DownloadItem
   ) {
-    throw new Error(
-      `Provider do YouTube ainda não configurado para o download ${download.id}.`
+    return externalDownloaderProvider.process(
+      download
     );
   },
 };

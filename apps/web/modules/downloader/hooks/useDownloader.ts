@@ -10,6 +10,8 @@ import type {
   DownloadItem,
 } from "../types";
 
+const POLLING_INTERVAL = 3000;
+
 export function useDownloader() {
   const [downloads, setDownloads] =
     useState<DownloadItem[]>([]);
@@ -52,6 +54,103 @@ export function useDownloader() {
       cancelled = true;
     };
   }, []);
+
+  // ==========================
+  // Polling de downloads
+  // ==========================
+
+  useEffect(() => {
+    const processingDownloads =
+      downloads.filter(
+        (download) =>
+          download.status ===
+          "Processando"
+      );
+
+    if (
+      processingDownloads.length === 0
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const timeout = window.setTimeout(
+      async () => {
+        try {
+          const updatedDownloads =
+            await Promise.all(
+              processingDownloads.map(
+                async (download) => {
+                  try {
+                    return await downloaderApi.getDownload(
+                      download.id
+                    );
+                  } catch (error) {
+                    console.error(
+                      `Erro ao consultar download ${download.id}:`,
+                      error
+                    );
+
+                    return null;
+                  }
+                }
+              )
+            );
+
+          if (cancelled) {
+            return;
+          }
+
+          const validUpdates =
+            updatedDownloads.filter(
+              (
+                download
+              ): download is DownloadItem =>
+                download !== null
+            );
+
+          if (
+            validUpdates.length === 0
+          ) {
+            return;
+          }
+
+          setDownloads(
+            (current) =>
+              current.map(
+                (currentDownload) => {
+                  const updated =
+                    validUpdates.find(
+                      (download) =>
+                        download.id ===
+                        currentDownload.id
+                    );
+
+                  return (
+                    updated ??
+                    currentDownload
+                  );
+                }
+              )
+          );
+        } catch (error) {
+          console.error(
+            "Erro no polling dos downloads:",
+            error
+          );
+        }
+      },
+      POLLING_INTERVAL
+    );
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(
+        timeout
+      );
+    };
+  }, [downloads]);
 
   // ==========================
   // Atualizar download
@@ -98,17 +197,27 @@ export function useDownloader() {
   // Remover da interface
   // ==========================
 
-  async function deleteDownload(id: string) {
-  try {
-    await downloaderApi.deleteDownload(id);
+  async function deleteDownload(
+    id: string
+  ) {
+    try {
+      await downloaderApi.deleteDownload(
+        id
+      );
 
-    setDownloads((current) =>
-      current.filter((download) => download.id !== id)
-    );
-  } catch (error) {
-    console.error("Erro ao excluir download:", error);
+      setDownloads((current) =>
+        current.filter(
+          (download) =>
+            download.id !== id
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao excluir download:",
+        error
+      );
+    }
   }
-}
 
   // ==========================
   // Baixar arquivo
@@ -154,7 +263,9 @@ export function useDownloader() {
           item.id === id
       );
 
-    if (!download) return;
+    if (!download) {
+      return;
+    }
 
     switch (download.status) {
       case "Baixando": {

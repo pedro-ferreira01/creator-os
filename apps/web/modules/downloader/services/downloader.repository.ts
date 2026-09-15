@@ -17,6 +17,7 @@ type DownloadRow = {
   thumbnail_url: string | null;
   file_name: string | null;
   file_url: string | null;
+  apify_run_id: string | null;
 };
 
 type CreateDownloadRow = {
@@ -29,6 +30,7 @@ type CreateDownloadRow = {
   thumbnail_url: string | null;
   file_name: string | null;
   file_url: string | null;
+  apify_run_id: string | null;
 };
 
 type UpdateDownloadRow = Partial<
@@ -50,8 +52,12 @@ function mapDownloadRow(
     title: row.title,
     thumbnailUrl:
       row.thumbnail_url,
-    fileName: row.file_name,
-    fileUrl: row.file_url,
+    fileName:
+      row.file_name,
+    fileUrl:
+      row.file_url,
+    apifyRunId:
+      row.apify_run_id,
     errorMessage: null,
     createdAt: "",
     updatedAt: null,
@@ -77,16 +83,15 @@ export const downloaderRepository = {
       thumbnail_url: null,
       file_name: null,
       file_url: null,
+      apify_run_id: null,
     };
 
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("downloads")
-      .insert(row)
-      .select()
-      .single();
+    const { data, error } =
+      await supabase
+        .from("downloads")
+        .insert(row)
+        .select()
+        .single();
 
     if (error) {
       throw new Error(
@@ -104,15 +109,13 @@ export const downloaderRepository = {
     id: string,
     updates: UpdateDownloadRow
   ): Promise<DownloadItem> {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("downloads")
-      .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
+    const { data, error } =
+      await supabase
+        .from("downloads")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
 
     if (error) {
       throw new Error(
@@ -129,14 +132,12 @@ export const downloaderRepository = {
     supabase: SupabaseClient,
     id: string
   ): Promise<DownloadItem | null> {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("downloads")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+    const { data, error } =
+      await supabase
+        .from("downloads")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
     if (error) {
       throw new Error(
@@ -157,16 +158,14 @@ export const downloaderRepository = {
     supabase: SupabaseClient,
     userId: string
   ): Promise<DownloadItem[]> {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("downloads")
-      .select("*")
-      .eq("user_id", userId)
-      .order("id", {
-        ascending: false,
-      });
+    const { data, error } =
+      await supabase
+        .from("downloads")
+        .select("*")
+        .eq("user_id", userId)
+        .order("id", {
+          ascending: false,
+        });
 
     if (error) {
       throw new Error(
@@ -183,12 +182,11 @@ export const downloaderRepository = {
     supabase: SupabaseClient,
     id: string
   ): Promise<void> {
-    const {
-      error,
-    } = await supabase
-      .from("downloads")
-      .delete()
-      .eq("id", id);
+    const { error } =
+      await supabase
+        .from("downloads")
+        .delete()
+        .eq("id", id);
 
     if (error) {
       throw new Error(

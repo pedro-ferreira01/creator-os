@@ -1,44 +1,28 @@
 import { NextResponse } from "next/server";
 
-function getFileName(
-  value: string | null
-): string {
+function getFileName(value: string | null): string {
   if (!value) {
     return "creatoros-download.mp4";
   }
 
-  const sanitized =
-    value
-      .trim()
-      .replace(
-        /[^a-zA-Z0-9._-]/g,
-        "-"
-      );
+  const sanitized = value
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]/g, "-");
 
-  return (
-    sanitized ||
-    "creatoros-download.mp4"
-  );
+  return sanitized || "creatoros-download.mp4";
 }
 
-export async function GET(
-  request: Request
-) {
+export async function GET(request: Request) {
   try {
-    const { searchParams } =
-      new URL(request.url);
+    const { searchParams } = new URL(request.url);
 
-    const fileUrl =
-      searchParams.get("url");
-
-    const fileName =
-      searchParams.get("filename");
+    const fileUrl = searchParams.get("url");
+    const fileName = searchParams.get("filename");
 
     if (!fileUrl) {
       return NextResponse.json(
         {
-          error:
-            "A URL do arquivo é obrigatória.",
+          error: "A URL do arquivo é obrigatória.",
         },
         { status: 400 }
       );
@@ -51,8 +35,7 @@ export async function GET(
     } catch {
       return NextResponse.json(
         {
-          error:
-            "A URL do arquivo é inválida.",
+          error: "A URL do arquivo é inválida.",
         },
         { status: 400 }
       );
@@ -63,27 +46,23 @@ export async function GET(
       "facebook.com",
       "fb.com",
       "fbsbx.com",
+      "api.apify.com",
     ];
 
-    const hostname =
-      parsedUrl.hostname
-        .toLowerCase()
-        .replace(/^www\./, "");
+    const hostname = parsedUrl.hostname
+      .toLowerCase()
+      .replace(/^www\./, "");
 
-    const isAllowedHost =
-      allowedHosts.some(
-        (allowedHost) =>
-          hostname === allowedHost ||
-          hostname.endsWith(
-            `.${allowedHost}`
-          )
-      );
+    const isAllowedHost = allowedHosts.some(
+      (allowedHost) =>
+        hostname === allowedHost ||
+        hostname.endsWith(`.${allowedHost}`)
+    );
 
     if (!isAllowedHost) {
       return NextResponse.json(
         {
-          error:
-            "O domínio do arquivo não é permitido.",
+          error: "O domínio do arquivo não é permitido.",
         },
         { status: 400 }
       );
@@ -99,8 +78,7 @@ export async function GET(
     if (!response.ok) {
       return NextResponse.json(
         {
-          error:
-            `Não foi possível obter o arquivo. Status: ${response.status}.`,
+          error: `Não foi possível obter o arquivo. Status: ${response.status}.`,
         },
         {
           status: 502,
@@ -119,18 +97,13 @@ export async function GET(
     }
 
     const contentType =
-      response.headers.get(
-        "content-type"
-      ) ??
+      response.headers.get("content-type") ??
       "video/mp4";
 
     const contentLength =
-      response.headers.get(
-        "content-length"
-      );
+      response.headers.get("content-length");
 
-    const headers =
-      new Headers();
+    const headers = new Headers();
 
     headers.set(
       "Content-Type",
