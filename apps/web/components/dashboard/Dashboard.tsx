@@ -22,7 +22,7 @@ import {
 import { useDownloader } from "@/modules/downloader";
 
 import {
-  recentProjects,
+  
   dailyMission,
 } from "@/lib/dashboard-data";
 
@@ -468,9 +468,9 @@ export default function Dashboard() {
       />
 
       <div className="dashboard-grid">
-        <RecentProjectsCard
-          projects={recentProjects}
+        <RecentProjectsCard projects={projects} 
         />
+    
 
         <DailyMissionCard
           missions={dailyMission}
