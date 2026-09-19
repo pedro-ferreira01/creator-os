@@ -16,6 +16,7 @@ import Toast from "@/components/ui/Toast";
 
 import {
   useWorkspace,
+  type CreateWorkspaceProject,
   type WorkspaceProject,
 } from "@/modules/workspace";
 
@@ -204,43 +205,41 @@ export default function Dashboard() {
         return;
       }
 
-      const newProject: WorkspaceProject = {
-        id: crypto.randomUUID(),
+      const newProject: CreateWorkspaceProject = {
+  id: crypto.randomUUID(),
 
-        name: name.trim(),
+  name: name.trim(),
 
-        description:
-          description.trim() ||
-          "Sem descrição",
+  description:
+    description.trim() ||
+    "Sem descrição",
 
-        category: "Workspace",
+  category: "Workspace",
 
-        status: "Planejamento",
+  status: "Planejamento",
 
-        priority: "Média",
+  priority: "Média",
 
-        progress: 0,
+  progress: 0,
 
-        updatedAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 
-        pinned: false,
+  pinned: false,
 
-        favorite: false,
+  favorite: false,
 
-        archived: false,
+  archived: false,
 
-        owner: "Sr. Finch",
+  createdAt: new Date()
+    .toISOString()
+    .substring(0, 10),
 
-        createdAt: new Date()
-          .toISOString()
-          .substring(0, 10),
+  dueDate: dueDate || null,
 
-        dueDate: dueDate || null,
+  color: "#3b82f6",
 
-        color: "#3b82f6",
-
-        tags: [],
-      };
+  tags: [],
+};
 
       await createProject(newProject);
 

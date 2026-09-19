@@ -10,34 +10,24 @@ export type WorkspacePriority =
 
 export interface WorkspaceProject {
   id: string;
-
   name: string;
-
   description: string;
-
   category: string;
-
   status: WorkspaceStatus;
-
   priority: WorkspacePriority;
-
   progress: number;
-
   updatedAt: string;
-
   pinned: boolean;
-
   favorite: boolean;
-
   archived: boolean;
-
   owner: string;
-
   createdAt: string;
-
   dueDate: string | null;
-
   color: string;
-
   tags: string[];
 }
+
+export type CreateWorkspaceProject = Omit<
+  WorkspaceProject,
+  "owner"
+>;

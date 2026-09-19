@@ -35,7 +35,6 @@ type CreateWorkspaceInput = {
   pinned?: boolean;
   favorite?: boolean;
   archived?: boolean;
-  owner?: string;
   createdAt?: string;
   dueDate?: string | null;
   color?: string;
@@ -256,10 +255,11 @@ export async function POST(
             body.favorite ?? false,
           archived:
             body.archived ?? false,
-          owner:
-            typeof body.owner === "string"
-              ? body.owner.trim()
-              : "",
+            owner:
+  typeof user.user_metadata?.full_name === "string" &&
+  user.user_metadata.full_name.trim()
+    ? user.user_metadata.full_name.trim()
+    : user.email ?? "",
           createdAt:
             typeof body.createdAt === "string" &&
             body.createdAt

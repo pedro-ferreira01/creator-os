@@ -9,6 +9,7 @@ import {
 } from "../services/workspace.service";
 
 import type {
+  CreateWorkspaceProject,
   WorkspaceProject,
   WorkspaceStatus,
 } from "../types";
@@ -92,8 +93,8 @@ export function useWorkspace() {
   }
 
   async function createProject(
-    project: WorkspaceProject
-  ) {
+  project: CreateWorkspaceProject
+) {
     try {
       setError(null);
 

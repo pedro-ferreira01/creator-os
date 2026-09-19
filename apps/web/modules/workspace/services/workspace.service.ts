@@ -1,5 +1,6 @@
 import type {
   WorkspaceProject,
+  CreateWorkspaceProject,
   WorkspacePriority,
   WorkspaceStatus,
 } from "../types";
@@ -81,9 +82,9 @@ export const workspaceService = {
     );
   },
 
-  async createProject(
-    project: WorkspaceProject
-  ): Promise<WorkspaceProject> {
+ async createProject(
+  project: CreateWorkspaceProject
+): Promise<WorkspaceProject> {
     const response = await fetch(
       "/api/workspace/projects",
       {
@@ -110,8 +111,7 @@ export const workspaceService = {
             project.favorite,
           archived:
             project.archived,
-          owner:
-            project.owner,
+          
           createdAt:
             project.createdAt,
           dueDate:
