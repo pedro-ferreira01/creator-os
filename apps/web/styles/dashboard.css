@@ -88,6 +88,28 @@
 @media (min-width: 1024px) {
   .dashboard-grid {
     grid-template-columns: 2fr 1fr;
+    grid-template-areas:
+      "recent workspace"
+      "downloader workspace";
+    align-items: start;
+  }
+
+  .dashboard-recent-projects {
+    grid-area: recent;
+  }
+
+  .dashboard-workspace {
+    grid-area: workspace;
+  }
+
+  .dashboard-downloader {
+    grid-area: downloader;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 2fr 1fr;
   }
 }
 

@@ -6,7 +6,6 @@ import {
   DashboardHeader,
   DashboardStats,
   RecentProjectsCard,
-  DailyMissionCard,
   WorkspaceSection,
   DownloaderSection,
 } from "@/components/dashboard";
@@ -21,11 +20,6 @@ import {
 } from "@/modules/workspace";
 
 import { useDownloader } from "@/modules/downloader";
-
-import {
-  
-  dailyMission,
-} from "@/lib/dashboard-data";
 
 import { useToast } from "@/hooks/useToast";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -466,174 +460,185 @@ export default function Dashboard() {
         stats={stats}
       />
 
-      <div className="dashboard-grid">
-        <RecentProjectsCard projects={projects} 
-        />
-    
+     <div className="dashboard-grid">
+  <div className="dashboard-recent-projects">
+    <RecentProjectsCard
+      projects={projects}
+    />
+  </div>
 
-        <DailyMissionCard
-          missions={dailyMission}
-        />
+               <div className="dashboard-workspace">
+          <WorkspaceSection
+            showCreateForm={
+              showCreateForm
+            }
 
-        <WorkspaceSection
-          showCreateForm={
-            showCreateForm
-          }
+            editingProjectId={
+              editingProjectId
+            }
 
-          editingProjectId={
-            editingProjectId
-          }
+            projectName={
+              projectName
+            }
 
-          projectName={
-            projectName
-          }
+            projectDescription={
+              projectDescription
+            }
 
-          projectDescription={
-            projectDescription
-          }
+            projectDueDate={
+              projectDueDate
+            }
 
-          projectDueDate={
-            projectDueDate
-          }
+            editingName={
+              editingName
+            }
 
-          editingName={
-            editingName
-          }
+            editingDescription={
+              editingDescription
+            }
 
-          editingDescription={
-            editingDescription
-          }
+            editingDueDate={
+              editingDueDate
+            }
 
-          editingDueDate={
-            editingDueDate
-          }
+            setProjectName={
+              setProjectName
+            }
 
-          setProjectName={
-            setProjectName
-          }
+            setProjectDescription={
+              setProjectDescription
+            }
 
-          setProjectDescription={
-            setProjectDescription
-          }
+            setProjectDueDate={
+              setProjectDueDate
+            }
 
-          setProjectDueDate={
-            setProjectDueDate
-          }
+            setEditingName={
+              setEditingName
+            }
 
-          setEditingName={
-            setEditingName
-          }
+            setEditingDescription={
+              setEditingDescription
+            }
 
-          setEditingDescription={
-            setEditingDescription
-          }
+            setEditingDueDate={
+              setEditingDueDate
+            }
 
-          setEditingDueDate={
-            setEditingDueDate
-          }
+            handleCreateProject={
+              handleCreateProject
+            }
 
-          handleCreateProject={
-            handleCreateProject
-          }
+            onToggleCreateForm={() =>
+              setShowCreateForm(
+                (current) => !current
+              )
+            }
 
-          onToggleCreateForm={() =>
-            setShowCreateForm(
-              (current) => !current
-            )
-          }
+            onCancelEdit={
+              handleCancelEdit
+            }
 
-          onCancelEdit={
-            handleCancelEdit
-          }
+            projects={
+              filteredProjects
+            }
 
-          projects={
-            filteredProjects
-          }
+            onDelete={
+              handleDeleteProject
+            }
 
-          onDelete={
-            handleDeleteProject
-          }
+            onEdit={
+              handleStartEdit
+            }
 
-          onEdit={
-            handleStartEdit
-          }
+            onTogglePin={
+              handleTogglePin
+            }
 
-          onTogglePin={
-            handleTogglePin
-          }
+            onToggleFavorite={
+              handleToggleFavorite
+            }
 
-          onToggleFavorite={
-            handleToggleFavorite
-          }
+            onToggleArchive={
+              handleToggleArchive
+            }
 
-          onToggleArchive={
-            handleToggleArchive
-          }
+            onUpdateStatus={
+              handleUpdateStatus
+            }
 
-          onUpdateStatus={
-            handleUpdateStatus
-          }
+            onUpdateProgress={
+              handleUpdateProgress
+            }
 
-          onUpdateProgress={
-            handleUpdateProgress
-          }
+            search={
+              search
+            }
 
-          search={search}
-          setSearch={setSearch}
+            setSearch={
+              setSearch
+            }
 
-          statusFilter={
-            statusFilter
-          }
+            statusFilter={
+              statusFilter
+            }
 
-          setStatusFilter={
-            setStatusFilter
-          }
+            setStatusFilter={
+              setStatusFilter
+            }
 
-          priorityFilter={
-            priorityFilter
-          }
+            priorityFilter={
+              priorityFilter
+            }
 
-          setPriorityFilter={
-            setPriorityFilter
-          }
+            setPriorityFilter={
+              setPriorityFilter
+            }
 
-          archiveFilter={
-            archiveFilter
-          }
+            archiveFilter={
+              archiveFilter
+            }
 
-          setArchiveFilter={
-            setArchiveFilter
-          }
+            setArchiveFilter={
+              setArchiveFilter
+            }
 
-          focusSearch={
-            focusWorkspaceSearch
-          }
+            focusSearch={
+              focusWorkspaceSearch
+            }
 
-          focusProjectName={
-            focusProjectName
-          }
-        />
+            focusProjectName={
+              focusProjectName
+            }
+          />
+        </div>
 
-        <DownloaderSection
-          downloads={downloads}
-          onCreate={
-            createDownload
-          }
-          onDelete={
-            deleteDownload
-          }
-          onPrimaryAction={
-            handlePrimaryAction
-          }
-        />
-
-        <CommandPalette
-          open={open}
-          onExecute={
-            executeCommand
-          }
-        />
+                <div className="dashboard-downloader">
+          <DownloaderSection
+            downloads={
+              downloads
+            }
+            onCreate={
+              createDownload
+            }
+            onDelete={
+              deleteDownload
+            }
+            onPrimaryAction={
+              handlePrimaryAction
+            }
+          />
+        </div>
       </div>
+
+      <CommandPalette
+        open={
+          open
+        }
+        onExecute={
+          executeCommand
+        }
+      />
     </>
   );
 }
